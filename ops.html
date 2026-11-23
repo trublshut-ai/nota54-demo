@@ -88,6 +88,18 @@ table.board tr.flash{background:rgba(20,184,166,.12)}
 .ms-list li.ok{color:var(--text)}.ms-list li.ok .ic{background:var(--green);border-color:var(--green)}
 .ms-list li.on{color:var(--teal2);font-weight:700}.ms-list li.on .ic{border-color:var(--teal2)}
 
+
+/* solution switch */
+.n54sw{display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:99px;border:1px solid rgba(147,164,191,.25);background:rgba(10,22,40,.6);font-family:"Inter","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;font-size:12px;line-height:1;white-space:nowrap;flex:0 0 auto}
+.n54sw a{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:99px;color:#93a4bf;text-decoration:none;font-weight:600;transition:background .15s,color .15s}
+.n54sw a:hover{color:#e6edf7;background:rgba(45,212,191,.12)}
+.n54sw a.on{background:linear-gradient(135deg,#14b8a6,#0ea5a0);color:#03201c}
+.n54sw a.home{padding:5px 8px;font-size:13px}
+.n54sw .lb{color:#5d7394;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;padding:0 4px 0 8px;font-weight:700}
+@media(max-width:700px){.n54sw .lb{display:none}}
+.n54sw .sh{display:none}
+@media(max-width:1700px){.n54sw .lb{display:none}.n54sw .fl{display:none}.n54sw .sh{display:inline}.n54sw a{padding:5px 8px}}
+@media(max-width:1400px){.n54sw a.on{display:none}}
 </style>
 </head>
 <body>
@@ -95,6 +107,7 @@ table.board tr.flash{background:rgba(20,184,166,.12)}
   <div class="wm">Nota<b>54</b></div>
   <div class="sep"></div>
   <div class="sub">Ops · orders · Sample Forwarder Ltd</div>
+  <nav class="n54sw" aria-label="Switch Nota54 demo"><span class="lb">Demos</span><a class="home" href="start/" title="All Nota54 demo workspaces">⌂</a><a class="on" href="backend.html" title="Freight &amp; Clearing desk"><span class="fl">Freight &amp; Clearing</span><span class="sh">Freight</span></a><a class="" href="energy/" title="Fuel &amp; LPG Distribution workspace"><span class="fl">Fuel &amp; LPG</span><span class="sh">Fuel &amp; LPG</span></a></nav>
   <div class="sp"></div>
   <span class="pill" id="sessPill" style="display:none">Session <span class="code" id="sessCode"></span></span>
   <span class="pill" id="conn"><span class="dot" id="connDot"></span><span id="connTxt">Connecting…</span></span>
