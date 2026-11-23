@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0a1628">
+<title>Nota54 · Manager approvals</title>
+<style>
+:root{--navy:#0a1628;--teal:#0d9488;--teal2:#14b8a6;--amber:#f59e0b;--text:#0f172a;--muted:#5b6b82;--line:#dbe3ee;--bg:#f4f7fb;--font:"Inter","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiased;min-height:100vh}
+.hd{background:var(--navy);color:#e6edf7;padding:12px 16px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hd .wm{font-weight:800;font-size:18px;letter-spacing:-.02em}.hd .wm b{color:#2dd4bf}
+.hd .p{font-size:12px;color:#9fb3cf}.hd .sp{flex:1}
+.soon{font-size:10.5px;font-weight:800;color:#fde68a;border:1px solid rgba(253,230,138,.4);background:rgba(245,158,11,.12);border-radius:99px;padding:3px 8px}
+main{max-width:520px;margin:0 auto;padding:16px 16px 36px}
+h1{font-size:22px;margin:4px 0 6px;letter-spacing:-.02em}
+.lead{color:var(--muted);font-size:14px;margin:0 0 14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 4px 18px rgba(15,23,42,.05);margin-bottom:12px}
+.conn{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted)}
+.conn i{width:8px;height:8px;border-radius:50%;background:#94a3b8;display:inline-block}
+.conn i.live{background:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,.18)}
+.conn i.connecting,.conn i.reconnecting{background:var(--amber)}
+.chip{display:inline-flex;align-items:center;font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:99px;border:1px solid var(--line)}
+.chip.pend{color:#0f766e;background:#ccfbf1;border-color:#99f6e4}
+.chip.ok{color:#166534;background:#dcfce7;border-color:#86efac}
+.chip.red{color:#991b1b;background:#fee2e2;border-color:#fca5a5}
+.code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--teal)}
+.amt{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:6px 0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:12px;padding:12px 16px;font-weight:800;font-size:15px;cursor:pointer;width:100%}
+.btn.pri{background:linear-gradient(135deg,var(--teal2),#0ea5a0);color:#03201c}
+.btn.danger{background:#fff;color:#b91c1c;border:1px solid #fecaca;margin-top:8px}
+.btn.ghost{background:#fff;color:var(--text);border:1px solid var(--line);margin-top:8px;font-weight:700}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kv{font-size:13px;margin:4px 0}.kv b{display:inline-block;min-width:78px;color:var(--muted);font-weight:600}
+.ncard{border:1px dashed #cbd5e1;border-radius:12px;padding:10px 12px;margin-top:10px;font-size:13px;background:#f8fafc}
+.ncard .ch{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--teal)}
+.tiny{font-size:12px;color:var(--muted)}
+.err{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;border-radius:12px;padding:12px;font-size:14px}
+</style>
+</head>
+<body>
+<header class="hd">
+  <div class="wm">Nota<b>54</b></div>
+  <div class="p">Fleet · manager</div>
+  <span class="soon">New · coming soon</span>
+  <div class="sp"></div>
+  <span class="conn" id="cTxt"><i id="cDot"></i> Connecting…</span>
+</header>
+<main id="main">
+  <p class="lead">Loading sample requests…</p>
+</main>
+<script>
+(function(){
+'use strict';
+const NTFY='https://ntfy.sh', KEY='n54-fleet-demo-v1', RKEY='n54-fleet-relay-v1';
+const zz=ms=>new Promise(r=>setTimeout(r,ms));
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+const params=new URLSearchParams(location.search);
+const code=(params.get('s')||'').toLowerCase();
+if(!/^[a-z0-9]{16}$/.test(code)){
+  document.getElementById('main').innerHTML='<div class="err">This phone page needs a session link from the fleet board. Open the laptop workspace, tap <b>Manager phone view</b>, and scan the QR code (or open that link).</div><p class="tiny" style="margin-top:16px"><a href="./" style="color:var(--teal)">Open the fleet board</a></p>';
+  document.getElementById('cTxt').textContent='No session';
+  return;
+}
+const Bus={
+  pub:async(topic,obj)=>{const body=JSON.stringify(obj);
+    for(let i=0;i<5;i++){try{const r=await fetch(NTFY+'/'+topic,{method:'POST',body});if(r.ok)return true;if(r.status===429){await zz(3000*(i+1));continue;}}catch(e){}await zz(700*(i+1)*(i+1));}
+    return false;},
+  sub:(topic,opt)=>{let es=null,lastId=null,closed=false,retry=0,timer=null,beat=Date.now();const seen={};
+    const status=s=>opt.onStatus&&opt.onStatus(s);
+    function open(){if(closed)return;clearTimeout(timer);if(es){try{es.close()}catch(e){}}
+      const since=lastId||opt.since;es=new EventSource(NTFY+'/'+topic+'/sse'+(since?'?since='+encodeURIComponent(since):''));status('connecting');
+      es.onopen=()=>{retry=0;beat=Date.now();status('live');};
+      es.addEventListener('keepalive',()=>{beat=Date.now();});
+      es.onmessage=ev=>{beat=Date.now();let d;try{d=JSON.parse(ev.data)}catch(e){return}if(!d||d.event!=='message'||seen[d.id])return;seen[d.id]=1;lastId=d.id;
+        let m;try{m=JSON.parse(d.message)}catch(e){return}if(m&&typeof m==='object')opt.onMsg(m);};
+      es.onerror=()=>{status('reconnecting');try{es.close()}catch(e){}clearTimeout(timer);timer=setTimeout(open,Math.min(15000,800*Math.pow(2,retry++)));};}
+    open();return {close:()=>{closed=true;clearTimeout(timer);if(es)es.close();}};}
+};
+const inTopic='nota54-fleet-'+code+'-in', outTopic='nota54-fleet-'+code+'-out';
+let state={reqs:[],notifs:[]}, view='list', cur=null, conn='connecting', busy=false, decided=null;
+
+function hydrateFromBoard(){
+  try{
+    const snap=JSON.parse(localStorage.getItem(KEY+'-snap-'+code));
+    if(snap&&Array.isArray(snap.reqs)){state=snap;return true;}
+  }catch(e){}
+  try{
+    const s=JSON.parse(localStorage.getItem(KEY));
+    if(s&&Array.isArray(s.reqs)){state={reqs:s.reqs,notifs:s.notifs||[]};return true;}
+  }catch(e){}
+  return false;
+}
+hydrateFromBoard();
+
+function setConn(s){
+  conn=s;const d=document.getElementById('cDot'),t=document.getElementById('cTxt');
+  if(d)d.className=s;
+  if(t){t.lastChild&&t.lastChild.nodeType===3?t.lastChild.remove():null;
+    const label=s==='live'?' Live':s==='connecting'?' Connecting…':' Reconnecting…';
+    t.appendChild(document.createTextNode(label));
+  }
+}
+function onMsg(m){if(!m||m.v!==1)return;if(m.type==='state'&&Array.isArray(m.reqs)){state=m;if(cur){const r=state.reqs.find(x=>x.id===cur);if(r&&r.status!=='pending'&&!decided)decided={id:r.id,action:r.status==='approved'?'approve':'decline'};}render();}}
+
+function sendDecision(id,action){
+  if(busy)return;busy=true;render();
+  const msg={v:1,type:'decision',id,action,at:Date.now()};
+  try{localStorage.setItem(KEY+'-dec-'+code,JSON.stringify(msg));}catch(e){}
+  decided={id,action};
+  Bus.pub(inTopic,msg).finally(()=>{busy=false;render();});
+}
+
+function render(){
+  const main=document.getElementById('main');
+  const reqs=state.reqs||[];
+  if(decided){
+    const r=reqs.find(x=>x.id===decided.id)||{id:decided.id,title:'Request'};
+    const ok=decided.action==='approve';
+    main.innerHTML='<h1>'+(ok?'Approved':'Declined')+'</h1><p class="lead">'+esc(r.title)+' <span class="code">'+esc(r.id)+'</span></p>'+
+      '<div class="card"><span class="chip '+(ok?'ok':'red')+'">'+(ok?'Approved on this phone':'Declined on this phone')+'</span>'+
+      '<div class="ncard"><div class="ch">SMS · mock</div>A notification card is now on the fleet board. Demo only — nothing was actually sent.</div>'+
+      '<div class="ncard"><div class="ch">Email · mock</div>Copied to the fleet desk. Demo only — nothing was sent.</div>'+
+      '<button class="btn ghost" id="backBtn">Back to requests</button></div>'+
+      '<p class="tiny">Fleet Management is a new Nota54 offering, shown as a preview. It is not a live product today.</p>';
+    document.getElementById('backBtn').onclick=()=>{decided=null;view='list';cur=null;render();};
+    return;
+  }
+  if(view==='detail'&&cur){
+    const r=reqs.find(x=>x.id===cur);
+    if(!r){view='list';return render();}
+    if(r.status!=='pending'){decided={id:r.id,action:r.status==='approved'?'approve':'decline'};return render();}
+    main.innerHTML='<h1>'+esc(r.title)+'</h1><p class="lead">Approve or decline this sample request. The fleet board updates live.</p>'+
+      '<div class="card" id="reqCard"><span class="chip pend">Waiting</span> <span class="code">'+esc(r.id)+'</span>'+
+      '<div class="amt">'+esc(r.amount)+'</div>'+
+      '<div class="kv"><b>Vehicle</b> '+esc(r.truck)+'</div>'+
+      (r.driverName||r.driver?'<div class="kv"><b>Driver</b> '+esc(r.driverName||r.driver)+'</div>':'')+
+      '<div class="kv"><b>Where</b> '+esc(r.where)+'</div>'+
+      '<div class="kv"><b>When</b> '+esc(r.at)+'</div>'+
+      '<p style="margin:10px 0 14px">'+esc(r.note)+'</p>'+
+      (busy?'<p class="tiny">Sending…</p>':'<button class="btn pri" id="okBtn">Approve</button><button class="btn danger" id="noBtn">Decline</button>')+
+      '<button class="btn ghost" id="backBtn">Back</button></div>'+
+      '<p class="tiny">Sample data only. Approving shows a mock SMS and email card on the laptop — nothing is sent for real.</p>';
+    const ok=document.getElementById('okBtn'),no=document.getElementById('noBtn'),bk=document.getElementById('backBtn');
+    if(ok)ok.onclick=()=>sendDecision(r.id,'approve');
+    if(no)no.onclick=()=>sendDecision(r.id,'decline');
+    bk.onclick=()=>{view='list';cur=null;render();};
+    return;
+  }
+  const pend=reqs.filter(r=>r.status==='pending');
+  const done=reqs.filter(r=>r.status!=='pending');
+  let h='<h1>Approvals</h1><p class="lead">Requests from the sample fleet that need a manager. Open one and approve it on this phone.</p>';
+  if(!reqs.length)h+='<div class="card"><p class="lead" style="margin:0">Waiting for the fleet board to share the sample requests… Keep the laptop tab open.</p></div>';
+  pend.forEach(r=>{
+    h+='<div class="card" data-id="'+esc(r.id)+'" style="cursor:pointer"><span class="chip pend">Waiting</span> <span class="code">'+esc(r.id)+'</span>'+
+      '<div style="font-weight:800;margin:6px 0 2px">'+esc(r.title)+'</div>'+
+      '<div class="amt" style="font-size:18px">'+esc(r.amount)+'</div>'+
+      '<div class="tiny">'+esc(r.truck)+(r.driverName||r.driver?' · '+esc(r.driverName||r.driver):'')+' · '+esc(r.where)+'</div></div>';
+  });
+  if(done.length){
+    h+='<p class="tiny">Already decided</p>';
+    done.forEach(r=>{h+='<div class="card"><span class="chip '+(r.status==='approved'?'ok':'red')+'">'+esc(r.status)+'</span> '+esc(r.title)+' <span class="code">'+esc(r.id)+'</span></div>';});
+  }
+  h+='<p class="tiny">Fleet Management is a new Nota54 offering, shown as a preview. It is not a live product today. All figures are sample data.</p>';
+  main.innerHTML=h;
+  main.querySelectorAll('.card[data-id]').forEach(c=>c.onclick=()=>{cur=c.dataset.id;view='detail';render();});
+}
+
+window.__n54p={code,state:()=>state,sendDecision};
+hydrateFromBoard();
+Bus.sub(outTopic,{since:Math.floor(Date.now()/1000)-3600,onStatus:setConn,onMsg});
+Bus.pub(inTopic,{v:1,type:'hello',at:Date.now()});
+window.addEventListener('storage',e=>{if(e.key===KEY||(e.key&&e.key.indexOf(KEY+'-snap-'+code)===0)){hydrateFromBoard();render();}});
+setInterval(()=>{if(hydrateFromBoard())render();},1000);
+render();
+})();
+</script>
+</body>
+</html>

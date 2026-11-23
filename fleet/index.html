@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0a1628">
+<title>Nota54 — Fleet Management (preview)</title>
+<style>
+:root{--n9:#0a1628;--n85:#0e1d33;--n8:#12243f;--n7:#1a3256;--n6:#25446f;--teal:#0d9488;--teal2:#14b8a6;--teal3:#2dd4bf;--tsoft:rgba(20,184,166,.14);--green:#22c55e;--amber:#f59e0b;--red:#ef4444;--sky:#38bdf8;--text:#e6edf7;--muted:#93a4bf;--line:rgba(147,164,191,.18);--card:#0f1f38;--font:"Inter","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;--mono:ui-monospace,Menlo,Consolas,monospace;--bg:#f4f7fb}
+*{box-sizing:border-box}html,body{margin:0}
+body{font-family:var(--font);background:radial-gradient(1000px 500px at 15% -10%,rgba(20,184,166,.10),transparent 60%),var(--n9);color:var(--text);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased;min-height:100vh}
+button,input,select,textarea{font-family:inherit}
+.top{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);background:rgba(6,13,26,.85);position:sticky;top:0;z-index:20;backdrop-filter:blur(8px);flex-wrap:wrap}
+.wm{font-weight:800;font-size:21px;letter-spacing:-.02em}.wm b{color:var(--teal3)}
+.sep{width:1px;height:24px;background:var(--line)}.sub{color:var(--muted);font-size:13px}.sp{flex:1}
+.pill{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;border:1px solid var(--line);white-space:nowrap}
+.pill.sample{color:#fde68a;background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.35)}
+.pill.soon{color:#fde68a;background:rgba(245,158,11,.14);border-color:rgba(245,158,11,.45);font-weight:800;letter-spacing:.01em}
+nav.tabs{display:flex;gap:4px;padding:8px 20px 0;border-bottom:1px solid var(--line);overflow-x:auto;background:rgba(6,13,26,.5);-webkit-overflow-scrolling:touch}
+nav.tabs button{background:none;border:none;color:var(--muted);padding:10px 14px;font-weight:600;font-size:13.5px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+nav.tabs button.on{color:var(--text);border-bottom-color:var(--teal3)}
+nav.tabs button .n{display:inline-block;min-width:18px;padding:0 5px;margin-left:6px;border-radius:99px;background:rgba(239,68,68,.2);color:#fca5a5;font-size:11px}
+.wrap{padding:16px 20px 30px;max-width:1500px;margin:0 auto}
+.grid{display:grid;gap:14px}.g2{grid-template-columns:1fr 1fr}.g21{grid-template-columns:1.2fr .8fr}.g4{grid-template-columns:repeat(4,1fr)}.g5{grid-template-columns:repeat(5,1fr)}
+@media(max-width:1000px){.top{position:static}.g2,.g21,.g4,.g5{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.025),transparent),var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-width:0}
+h2{margin:0 0 4px;font-size:18px;letter-spacing:-.01em}h3{margin:0 0 10px;font-size:14px}
+.lead{color:var(--muted);font-size:13px;margin:0 0 14px}
+.kpi .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.kpi .v{font-size:23px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.kpi .s{font-size:11.5px;color:var(--muted)}
+.kpi.warn{border-color:rgba(239,68,68,.5)}.kpi.warn .v{color:#fca5a5}
+.kpi.hl{border-color:rgba(45,212,191,.5)}.kpi.hl .v{color:var(--teal3)}
+.kpi.amb{border-color:rgba(245,158,11,.5)}.kpi.amb .v{color:#fde68a}
+.muted{color:var(--muted)}.tiny{font-size:11.5px}.small{font-size:12.5px}.code{font-family:var(--mono);font-size:12px;color:var(--teal3)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--n6);background:var(--n8);color:var(--text);padding:6px 11px;border-radius:9px;font-weight:600;font-size:12.5px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--teal2)}.btn.pri{background:linear-gradient(135deg,var(--teal2),#0ea5a0);color:#03201c;border-color:transparent}
+.btn.danger{border-color:rgba(239,68,68,.45);color:#fca5a5}.btn.sm{padding:5px 9px;font-size:12px}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:99px;border:1px solid var(--line)}
+.chip.ok{color:#86efac;background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.35)}
+.chip.trip{color:#99f6e4;background:rgba(20,184,166,.14);border-color:rgba(20,184,166,.4)}
+.chip.idle{color:#bfdbfe;background:rgba(56,189,248,.1);border-color:rgba(56,189,248,.3)}
+.chip.workshop,.chip.amber{color:#fde68a;background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.4)}
+.chip.overdue,.chip.red{color:#fca5a5;background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.4)}
+.chip.grey{color:var(--muted)}
+table.t{width:100%;border-collapse:collapse}table.t th,table.t td{padding:8px 8px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+table.t th{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+table.t td.n,table.t th.n{text-align:right}
+.alert{display:flex;gap:10px;align-items:flex-start;padding:9px 10px;border-radius:10px;border:1px solid rgba(239,68,68,.35);background:rgba(239,68,68,.07);margin-bottom:8px;font-size:12.8px}
+.alert.amber{border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.08)}
+.alert.teal{border-color:rgba(20,184,166,.35);background:rgba(20,184,166,.08)}
+.truck{display:flex;gap:12px;align-items:flex-start;padding:11px 12px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;cursor:pointer;background:rgba(10,22,40,.35)}
+.truck:hover,.truck.on{border-color:rgba(45,212,191,.5);background:rgba(20,184,166,.07)}
+.truck .id{font-weight:800;letter-spacing:-.02em}
+.dotst{width:10px;height:10px;border-radius:50%;margin-top:5px;flex:0 0 auto}
+.dotst.trip{background:var(--teal2);box-shadow:0 0 0 3px rgba(20,184,166,.2)}
+.dotst.idle{background:#38bdf8}
+.dotst.workshop{background:var(--amber)}
+.mapbox{background:#07111f;border:1px solid var(--line);border-radius:12px;overflow:hidden;position:relative;min-height:340px}
+.mapbox svg{width:100%;height:auto;display:block}
+.mapcap{position:absolute;left:10px;bottom:10px;font-size:11px;color:#93a4bf;background:rgba(7,17,31,.8);padding:4px 8px;border-radius:8px;border:1px solid var(--line)}
+.foot{margin:8px 20px 24px;color:var(--muted);font-size:12px;max-width:1500px}
+@media(max-width:1560px){.hide-narrow{display:none!important}}
+@media(max-width:1400px){.hide-mid,.top .n54sw .lb{display:none!important}.top{gap:10px}}
+.n54sw{display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:99px;border:1px solid rgba(147,164,191,.25);background:rgba(10,22,40,.6);font-family:var(--font);font-size:12px;line-height:1;white-space:nowrap;flex:0 0 auto}
+.n54sw a{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:99px;color:#93a4bf;text-decoration:none;font-weight:600;transition:background .15s,color .15s}
+.n54sw a:hover{color:#e6edf7;background:rgba(45,212,191,.12)}
+.n54sw a.on{background:linear-gradient(135deg,#14b8a6,#0ea5a0);color:#03201c}
+.n54sw a.home{padding:5px 8px;font-size:13px}
+.n54sw .lb{color:#5d7394;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;padding:0 4px 0 8px;font-weight:700}
+@media(max-width:700px){.n54sw .lb{display:none}}
+.n54sw .sh{display:none}
+@media(max-width:1700px){.n54sw .lb{display:none}.n54sw .fl{display:none}.n54sw .sh{display:inline}.n54sw a{padding:5px 8px}}
+@media(max-width:1400px){.n54sw a.on{display:none}}
+.relay{display:inline-flex;align-items:center;gap:6px}.relay i{width:7px;height:7px;border-radius:50%;background:#94a3b8;display:inline-block}.relay i.live{background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.18)}.relay i.connecting,.relay i.reconnecting{background:#f59e0b}
+.qrbox{background:#fff;border-radius:14px;padding:12px;display:inline-block;line-height:0}.qrbox svg{width:230px;height:230px}
+.phn{position:fixed;right:18px;top:74px;z-index:85;width:360px;max-width:calc(100vw - 36px);background:var(--n8);border:1px solid var(--teal3);border-radius:14px;padding:12px 14px;box-shadow:0 14px 40px rgba(0,0,0,.5);transform:translateX(120%);transition:transform .35s ease}
+.phn.show{transform:none}.phn .h{display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:4px}.phn .h .dot{width:9px;height:9px;border-radius:50%;background:var(--teal3);animation:pl 1.2s infinite}
+@keyframes pl{0%{box-shadow:0 0 0 0 rgba(45,212,191,.6)}100%{box-shadow:0 0 0 10px rgba(45,212,191,0)}}
+.modal{position:fixed;inset:0;background:rgba(4,10,20,.72);display:none;align-items:center;justify-content:center;z-index:100;padding:18px}
+.modal.show{display:flex}.mbox{background:var(--n8);border:1px solid var(--line);border-radius:16px;padding:18px;max-width:440px;width:100%}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:var(--n7);border:1px solid var(--teal2);color:var(--text);padding:10px 14px;border-radius:10px;opacity:0;pointer-events:none;transition:.25s;z-index:120;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.ncards{display:grid;gap:8px;margin-top:10px}
+.ncard{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(10,22,40,.5);font-size:12.5px}
+.ncard .ch{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--teal3)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+select.sm{background:var(--n8);color:var(--text);border:1px solid var(--n6);border-radius:8px;padding:5px 8px;font-size:12px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wm">Nota<b>54</b></div>
+  <div class="sep"></div>
+  <div class="sub"><b style="color:var(--text)">Fleet Management</b><span class="hide-mid"> · preview</span></div>
+  <span class="pill soon" id="soonBadge">New · coming soon</span>
+  <nav class="n54sw" aria-label="Switch Nota54 demo"><span class="lb">Demos</span><a class="home" href="../start/" title="All Nota54 demo workspaces">⌂</a><a href="../backend.html" title="Freight &amp; Clearing desk"><span class="fl">Freight &amp; Clearing</span><span class="sh">Freight</span></a><a href="../energy/" title="Fuel &amp; LPG Distribution workspace"><span class="fl">Fuel &amp; LPG</span><span class="sh">Fuel &amp; LPG</span></a><a class="on" href="./" title="Fleet Management workspace"><span class="fl">Fleet Management</span><span class="sh">Fleet</span></a></nav>
+  <div class="sp"></div>
+  <button class="btn sm pri" data-act="qr" title="Show the QR code a manager scans to approve requests on their phone">📱 Manager phone view</button>
+  <span class="pill relay" id="relayPill" title="Live link to the manager phone (public demo relay)"><i id="relayDot"></i><span id="relayTxt">Phone · off</span></span>
+  <span class="pill sample">Sample data</span>
+  <button class="btn sm" data-act="reset" title="Reload the original sample data">Reset demo</button>
+</header>
+<nav class="tabs" id="tabs">
+  <button data-tab="board" class="on">Fleet board</button>
+  <button data-tab="maint">Maintenance <span class="n" id="maintN" hidden></span></button>
+  <button data-tab="drivers">Drivers</button>
+  <button data-tab="approvals">Approvals <span class="n" id="apprN" hidden></span></button>
+</nav>
+<main class="wrap" id="main"></main>
+<div class="phn" id="phn"></div>
+<div class="modal" id="modal"></div>
+<div class="toast" id="toast"></div>
+<p class="foot">Fleet Management is a new Nota54 offering, shown here as a preview. It is not a live product today, and it is separate from Fuel &amp; LPG (a client industry) and from freight forwarding. All vehicles, people, amounts, routes and locations are sample data. The map is a schematic only — not live GPS. Mock SMS and email cards are displayed on screen; nothing is actually sent. Phone approvals travel over a public demo relay (ntfy.sh).</p>
+<script src="qrcode.js"></script>
+<script>
+(function(){
+'use strict';
+const KEY='n54-fleet-demo-v1', RKEY='n54-fleet-relay-v1', NTFY='https://ntfy.sh';
+const TODAY='2026-11-23';
+const zz=ms=>new Promise(r=>setTimeout(r,ms));
+function rid(n){const a='abcdefghijkmnpqrstuvwxyz23456789',b=new Uint8Array(n);crypto.getRandomValues(b);let s='';for(let i=0;i<n;i++)s+=a[b[i]%a.length];return s;}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function fmtDate(iso){const [y,m,d]=iso.split('-').map(Number);return new Date(Date.UTC(y,m-1,d)).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});}
+function daysFrom(iso){const a=Date.parse(TODAY+'T00:00:00Z'),b=Date.parse(iso+'T00:00:00Z');return Math.round((b-a)/86400000);}
+function toast(msg,ms){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove('show'),ms||2800);}
+function chip(txt,k){return '<span class="chip '+k+'">'+esc(txt)+'</span>';}
+function driverBy(id){return S.drivers.find(d=>d.id===id);}
+function truckBy(id){return S.trucks.find(t=>t.id===id);}
+function dName(id){const d=driverBy(id);return d?d.name:'Unassigned';}
+
+const SEED=()=>({
+  trucks:[
+    {id:'T-01',plate:'GT 2101 (sample)',type:'Curtain-side 10 t',status:'trip',loc:'Naivasha road',route:'Nairobi → Nakuru',driver:'D01',updated:'08:14',pos:[46,54]},
+    {id:'T-02',plate:'GT 2102 (sample)',type:'Box truck 7 t',status:'idle',loc:'Depot — Industrial Area',route:'',driver:null,updated:'07:02',pos:[56,72]},
+    {id:'T-03',plate:'GT 2103 (sample)',type:'Flatbed 12 t',status:'workshop',loc:'Service bay 2',route:'',driver:null,updated:'Yesterday',pos:[62,66],work:'Brake service'},
+    {id:'T-04',plate:'GT 2104 (sample)',type:'Curtain-side 10 t',status:'trip',loc:'Mombasa–Nairobi highway',route:'Mombasa → Nairobi',driver:'D02',updated:'08:51',pos:[76,82]},
+    {id:'T-05',plate:'GT 2105 (sample)',type:'Box truck 7 t',status:'idle',loc:'Eldoret yard',route:'',driver:null,updated:'06:40',pos:[42,22]},
+    {id:'T-06',plate:'GT 2106 (sample)',type:'Curtain-side 14 t',status:'trip',loc:'Kisumu–Kericho road',route:'Kisumu → Nairobi',driver:'D03',updated:'08:33',pos:[24,50]}
+  ],
+  drivers:[
+    {id:'D01',name:'Driver D. Kamau (sample)',licence:'valid',until:'2027-08-14'},
+    {id:'D02',name:'Driver A. Wanjiku (sample)',licence:'warn',until:'2026-12-05'},
+    {id:'D03',name:'Driver P. Otieno (sample)',licence:'valid',until:'2027-03-22'},
+    {id:'D04',name:'Driver M. Chirchir (sample)',licence:'expired',until:'2026-11-10'},
+    {id:'D05',name:'Driver S. Achieng (sample)',licence:'valid',until:'2028-01-19'}
+  ],
+  maint:[
+    {id:'M-01',truck:'T-03',title:'Brake service',status:'workshop',due:'2026-11-18',note:'In bay 2 since yesterday · waiting on a parts approval'},
+    {id:'M-02',truck:'T-01',title:'Tyre rotation',status:'overdue',due:'2026-11-18',note:'Due 18 Nov 2026 · truck is currently on a trip'},
+    {id:'M-03',truck:'T-05',title:'Scheduled service',status:'due',due:'2026-11-26',note:'Due in 3 days · truck is idle at Eldoret yard'},
+    {id:'M-04',truck:'T-02',title:'Quarterly inspection',status:'scheduled',due:'2026-11-30',note:'Booked at the depot workshop'}
+  ],
+  trips:[
+    {id:'TR-1042',truck:'T-01',driver:'D01',route:'Nairobi → Nakuru',when:'Today 06:40',status:'On the road',notes:'Fuel advance requested at Naivasha'},
+    {id:'TR-1041',truck:'T-04',driver:'D02',route:'Mombasa → Nairobi',when:'Today 05:10',status:'On the road',notes:''},
+    {id:'TR-1040',truck:'T-06',driver:'D03',route:'Kisumu → Nairobi',when:'Today 05:55',status:'On the road',notes:''},
+    {id:'TR-1039',truck:'T-02',driver:'D05',route:'Nairobi → Thika',when:'Yesterday 14:20 – 16:05',status:'Completed',notes:''},
+    {id:'TR-1038',truck:'T-05',driver:'D04',route:'Eldoret → Kitale',when:'Yesterday 09:00 – 11:30',status:'Completed',notes:''},
+    {id:'TR-1037',truck:'T-01',driver:'D01',route:'Nakuru → Nairobi',when:'Yesterday 07:15 – 11:40',status:'Completed',notes:''}
+  ],
+  reqs:[
+    {id:'FA-2201',type:'fuel_advance',title:'Fuel advance',truck:'T-01',driver:'D01',driverName:'Driver D. Kamau (sample)',amount:'KES 8,400 (sample)',where:'Naivasha filling station (sample)',note:'Driver reports not enough fuel to finish Nairobi → Nakuru.',status:'pending',at:'Today 08:21'},
+    {id:'RP-1188',type:'repair',title:'Brake parts',truck:'T-03',driver:null,amount:'KES 21,500 (sample)',where:'Depot workshop',note:'Pads and a labour estimate from the workshop. The vehicle is already in bay 2.',status:'pending',at:'Yesterday 16:40'}
+  ],
+  notifs:[]
+});
+
+let S, UI={tab:'board',sel:'T-01'};
+function load(){try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&Array.isArray(x.trucks)&&x.trucks.length===6){S=x;return;}}catch(e){}S=SEED();}
+function save(){localStorage.setItem(KEY,JSON.stringify(S));}
+load();
+
+function pending(){return S.reqs.filter(r=>r.status==='pending');}
+function maintAlerts(){return S.maint.filter(m=>m.status==='overdue'||m.status==='due'||m.status==='workshop');}
+function licAlerts(){return S.drivers.filter(d=>d.licence==='expired'||d.licence==='warn');}
+function assignedTo(did){const t=S.trucks.find(x=>x.driver===did);return t?t.id:null;}
+
+function statusChip(st){return st==='trip'?chip('On trip','trip'):st==='idle'?chip('Idle','idle'):chip('In workshop','workshop');}
+function maintChip(st){return st==='overdue'?chip('Overdue','overdue'):st==='due'?chip('Service due','amber'):st==='workshop'?chip('In workshop','workshop'):chip('Scheduled','grey');}
+function licChip(d){
+  if(d.licence==='expired')return chip('Licence expired','overdue');
+  if(d.licence==='warn')return chip('Expires '+fmtDate(d.until),'amber');
+  return chip('Valid to '+fmtDate(d.until),'ok');
+}
+
+function kpis(){
+  const nTrip=S.trucks.filter(t=>t.status==='trip').length;
+  const nIdle=S.trucks.filter(t=>t.status==='idle').length;
+  const nWork=S.trucks.filter(t=>t.status==='workshop').length;
+  const nPend=pending().length;
+  const nAlert=maintAlerts().filter(m=>m.status==='overdue'||m.status==='due').length+licAlerts().length;
+  return '<div class="grid g5" id="kpis">'+
+    '<div class="card kpi hl"><div class="l">Vehicles</div><div class="v">'+S.trucks.length+'</div><div class="s">Sample fleet</div></div>'+
+    '<div class="card kpi"><div class="l">On trip</div><div class="v">'+nTrip+'</div><div class="s">Out on a route</div></div>'+
+    '<div class="card kpi"><div class="l">Idle</div><div class="v">'+nIdle+'</div><div class="s">At a yard or depot</div></div>'+
+    '<div class="card kpi amb"><div class="l">In workshop</div><div class="v">'+nWork+'</div><div class="s">Off the road</div></div>'+
+    '<div class="card kpi '+(nPend||nAlert?'warn':'')+'"><div class="l">Needs attention</div><div class="v">'+(nPend+nAlert)+'</div><div class="s">'+nPend+' approval'+(nPend===1?'':'s')+' · '+nAlert+' alert'+(nAlert===1?'':'s')+'</div></div></div>';
+}
+
+function attention(){
+  const bits=[];
+  S.maint.filter(m=>m.status==='overdue').forEach(m=>bits.push({k:'red',t:m.truck+' · '+m.title+' is overdue (due '+fmtDate(m.due)+')'}));
+  S.maint.filter(m=>m.status==='due').forEach(m=>bits.push({k:'amber',t:m.truck+' · '+m.title+' is due on '+fmtDate(m.due)}));
+  licAlerts().forEach(d=>bits.push({k:d.licence==='expired'?'red':'amber',t:d.name.replace(' (sample)','')+' — licence '+(d.licence==='expired'?'expired '+fmtDate(d.until):'expires '+fmtDate(d.until))}));
+  pending().forEach(r=>bits.push({k:'teal',t:r.title+' '+r.id+' is waiting for approval'}));
+  if(!bits.length)return '';
+  return '<div style="margin:14px 0 0">'+bits.map(b=>'<div class="alert '+b.k+'">'+esc(b.t)+'</div>').join('')+'</div>';
+}
+
+function mapSvg(){
+  const cities=[['Kisumu',20,38],['Eldoret',30,26],['Nakuru',40,42],['Naivasha',46,49],['Nairobi',52,62],['Mombasa',82,86],['Kericho',31,46],['Thika',62,54],['Kitale',28,16]];
+  const roads=[['M 22 40 C 28 42, 30 46, 40 42'],['M 32 28 C 36 32, 38 38, 40 42'],['M 40 42 C 43 46, 45 50, 52 62'],['M 52 62 C 62 70, 72 78, 80 84'],['M 22 40 C 26 50, 40 60, 52 62'],['M 32 28 C 30 22, 28 18, 28 18'],['M 52 62 L 58 56']];
+  let h='<svg viewBox="0 0 100 100" role="img" aria-label="Sample schematic route map">';
+  h+='<rect width="100" height="100" fill="#07111f"/>';
+  h+='<path d="M18 14 C 20 8, 38 6, 48 12 C 62 8, 78 18, 88 36 C 94 52, 92 70, 86 86 C 70 96, 48 94, 34 86 C 20 78, 10 62, 12 42 C 13 28, 16 20, 18 14 Z" fill="#0c1b30" stroke="#1a3256" stroke-width=".8"/>';
+  roads.forEach(d=>{h+='<path d="'+d+'" fill="none" stroke="#25446f" stroke-width="1.2" stroke-linecap="round"/>';});
+  cities.forEach(([n,x,y])=>{const left=n==='Eldoret'||n==='Kericho'||n==='Mombasa';const tx=left?x-2:x+2, ty=n==='Mombasa'?y+4.2:y-1.6, anchor=left?'end':'start';h+='<circle cx="'+x+'" cy="'+y+'" r="1.2" fill="#64748b"/><text x="'+tx+'" y="'+ty+'" text-anchor="'+anchor+'" fill="#93a4bf" font-size="3.2" font-family="Inter,Segoe UI,sans-serif">'+n+'</text>';});
+  S.trucks.forEach(t=>{
+    const col=t.status==='trip'?'#14b8a6':t.status==='workshop'?'#f59e0b':'#38bdf8';
+    const on=UI.sel===t.id;
+    h+='<g data-act="sel" data-id="'+t.id+'" style="cursor:pointer">';
+    if(on)h+='<circle cx="'+t.pos[0]+'" cy="'+t.pos[1]+'" r="4.2" fill="none" stroke="'+col+'" stroke-width=".8" opacity=".9"/>';
+    h+='<circle cx="'+t.pos[0]+'" cy="'+t.pos[1]+'" r="2.2" fill="'+col+'" stroke="#07111f" stroke-width=".5"/>';
+    const lx=t.pos[0]>68?t.pos[0]-11:t.pos[0]+2.8, ly=t.pos[1]-2.4;
+    h+='<text x="'+lx+'" y="'+ly+'" fill="#e6edf7" stroke="#07111f" stroke-width=".7" paint-order="stroke" font-size="3.3" font-weight="700" font-family="Inter,Segoe UI,sans-serif">'+t.id+'</text></g>';
+  });
+  return h+'</svg>';
+}
+
+function truckList(){
+  return S.trucks.map(t=>{
+    const loc=t.status==='trip'?(t.route+' · '+t.loc):(t.loc+(t.work?' · '+t.work:''));
+    return '<div class="truck '+(UI.sel===t.id?'on':'')+'" data-act="sel" data-id="'+t.id+'" id="trk-'+t.id+'">'+
+      '<span class="dotst '+t.status+'"></span><div style="flex:1;min-width:0">'+
+      '<div class="row" style="justify-content:space-between"><div class="id">'+t.id+' · <span class="code">'+esc(t.plate)+'</span></div>'+statusChip(t.status)+'</div>'+
+      '<div class="small muted">'+esc(t.type)+'</div>'+
+      '<div class="small">'+esc(loc)+'</div>'+
+      '<div class="tiny muted">'+esc(t.driver?dName(t.driver):'No driver assigned')+' · updated '+esc(t.updated)+'</div>'+
+      '</div></div>';
+  }).join('');
+}
+
+function board(){
+  const t=truckBy(UI.sel)||S.trucks[0];
+  const free=S.drivers.filter(d=>!assignedTo(d.id));
+  let assign='';
+  if(t.status!=='workshop'){
+    if(t.driver){
+      assign='<div class="tiny muted" style="margin-top:8px">Assigned to '+esc(dName(t.driver))+'</div>';
+    }else{
+      assign='<div class="row" style="margin-top:8px"><select class="sm" id="asgDrv">'+(free.length?free.map(d=>'<option value="'+d.id+'">'+esc(d.name)+(d.licence==='expired'?' — licence expired':d.licence==='warn'?' — licence soon':'')+'</option>').join(''):'<option value="">No free drivers</option>')+'</select>'+
+        (free.length?'<button class="btn sm pri" data-act="assign" data-id="'+t.id+'">Assign driver</button>':'')+'</div>';
+    }
+  }
+  return kpis()+attention()+'<div class="grid g21" style="margin-top:14px">'+
+    '<div class="card"><h3>Vehicles</h3><p class="lead">A handful of sample trucks. Status is on trip, idle, or in the workshop. Locations are sample only.</p>'+truckList()+'</div>'+
+    '<div class="card"><h3>Route map</h3><p class="lead">Schematic of sample routes — not live GPS.</p><div class="mapbox" id="mapbox">'+mapSvg()+'<div class="mapcap">Sample map · not live tracking</div></div>'+
+    '<div style="margin-top:12px" id="selCard"><b>'+t.id+'</b> '+statusChip(t.status)+'<div class="small" style="margin-top:6px">'+esc(t.plate)+' · '+esc(t.type)+'</div>'+
+    '<div class="small">'+(t.route?esc(t.route)+'<br>':'')+esc(t.loc)+'</div>'+
+    '<div class="tiny muted">Updated '+esc(t.updated)+'</div>'+assign+'</div></div></div>';
+}
+
+function maintView(){
+  const rows=S.maint.map(m=>{
+    const t=truckBy(m.truck);
+    return '<tr><td><span class="code">'+m.id+'</span></td><td><b>'+m.truck+'</b><div class="tiny muted">'+esc(t?t.plate:'')+'</div></td><td>'+esc(m.title)+'<div class="tiny muted">'+esc(m.note)+'</div></td><td>'+fmtDate(m.due)+'</td><td>'+maintChip(m.status)+'</td></tr>';
+  }).join('');
+  return kpis()+'<div class="card" style="margin-top:14px"><h3>Maintenance schedule</h3><p class="lead">Service due and overdue items for the sample fleet. These are demo reminders, not live workshop data.</p>'+
+    '<div style="overflow:auto"><table class="t"><tr><th>Job</th><th>Vehicle</th><th>Work</th><th>Due</th><th>Status</th></tr>'+rows+'</table></div></div>';
+}
+
+function driversView(){
+  const rows=S.drivers.map(d=>{
+    const asg=assignedTo(d.id);
+    const log=S.trips.filter(t=>t.driver===d.id);
+    return '<tr id="drv-'+d.id+'"><td><b>'+esc(d.name)+'</b><div class="tiny muted">'+d.id+'</div></td><td>'+(asg?'<span class="code">'+asg+'</span> · '+esc((truckBy(asg)||{}).plate||'')+'<div class="tiny muted">'+statusChip((truckBy(asg)||{}).status||'idle')+'</div>':'<span class="muted">Unassigned</span>')+'</td><td>'+licChip(d)+'<div class="tiny muted">'+fmtDate(d.until)+'</div></td><td class="small">'+(log.length?log.slice(0,3).map(t=>esc(t.id)+' · '+esc(t.route)+' · '+esc(t.status)).join('<br>'):'<span class="muted">No trips in this sample log</span>')+'</td></tr>';
+  }).join('');
+  const tripRows=S.trips.map(t=>'<tr><td class="code">'+t.id+'</td><td>'+t.truck+'</td><td>'+esc(dName(t.driver))+'</td><td>'+esc(t.route)+'</td><td>'+esc(t.when)+'</td><td>'+esc(t.status)+'</td><td class="small muted">'+esc(t.notes||'—')+'</td></tr>').join('');
+  return kpis()+'<div class="card" style="margin-top:14px"><h3>Drivers</h3><p class="lead">Assignment, licence expiry warnings, and the trip log for this sample set.</p>'+
+    '<div style="overflow:auto"><table class="t"><tr><th>Driver</th><th>Assignment</th><th>Licence</th><th>Recent trips</th></tr>'+rows+'</table></div></div>'+
+    '<div class="card" style="margin-top:14px"><h3>Trip log</h3><div style="overflow:auto"><table class="t"><tr><th>Trip</th><th>Vehicle</th><th>Driver</th><th>Route</th><th>When</th><th>Status</th><th>Notes</th></tr>'+tripRows+'</table></div></div>';
+}
+
+function reqBody(r){
+  return '<div class="small"><b>'+esc(r.title)+'</b> · <span class="code">'+r.id+'</span></div>'+
+    '<div class="small">'+r.truck+(r.driver?' · '+esc(dName(r.driver)):'')+' · '+esc(r.amount)+'</div>'+
+    '<div class="tiny muted">'+esc(r.where)+' · '+esc(r.at)+'</div>'+
+    '<div class="small" style="margin-top:6px">'+esc(r.note)+'</div>';
+}
+
+function approvalsView(){
+  const pend=pending();
+  const done=S.reqs.filter(r=>r.status!=='pending');
+  const ncs=S.notifs.slice().reverse().map(n=>'<div class="ncard"><div class="ch">'+esc(n.channel)+' · mock</div><div>'+esc(n.title)+'</div><div class="tiny muted">'+esc(n.body)+'</div><div class="tiny muted">'+esc(n.at)+' · Demo only — nothing was sent.</div></div>').join('');
+  return kpis()+'<div class="grid g2" style="margin-top:14px"><div class="card" id="apprCard"><h3>Requests waiting for approval</h3><p class="lead">A manager can approve these on a phone. Open <b>Manager phone view</b> and scan the QR, or approve here.</p>'+
+    (pend.length?pend.map(r=>'<div class="card" style="margin:0 0 10px;border-color:rgba(45,212,191,.35)" id="req-'+r.id+'">'+reqBody(r)+
+      '<div class="row" style="margin-top:10px"><button class="btn sm pri" data-act="approve" data-id="'+r.id+'">Approve</button><button class="btn sm danger" data-act="decline" data-id="'+r.id+'">Decline</button></div></div>').join(''):'<div class="muted small">No pending requests. Use Reset demo to restore the sample queue.</div>')+
+    (done.length?'<h3 style="margin-top:16px">Already decided</h3>'+done.map(r=>'<div class="small" style="margin-bottom:8px">'+esc(r.title)+' <span class="code">'+r.id+'</span> '+chip(r.status==='approved'?'Approved':'Declined',r.status==='approved'?'ok':'red')+'<div class="tiny muted">'+(r.decided||'')+'</div></div>').join(''):'')+
+    '</div><div class="card"><h3>Notification cards</h3><p class="lead">When a request is approved or declined, a mock SMS and email card appear here. Nothing is actually sent.</p><div class="ncards" id="nlist">'+(ncs||'<div class="muted small">No notifications yet.</div>')+'</div></div></div>';
+}
+
+function render(){
+  const nM=S.maint.filter(m=>m.status==='overdue'||m.status==='due').length;
+  const nA=pending().length;
+  const mn=document.getElementById('maintN'),an=document.getElementById('apprN');
+  mn.hidden=!nM;mn.textContent=nM||'';an.hidden=!nA;an.textContent=nA||'';
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===UI.tab));
+  const view=UI.tab==='maint'?maintView():UI.tab==='drivers'?driversView():UI.tab==='approvals'?approvalsView():board();
+  document.getElementById('main').innerHTML=view;
+}
+
+function nowLabel(){const d=new Date();return d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}
+
+function decide(id,action,from){
+  const r=S.reqs.find(x=>x.id===id);if(!r||r.status!=='pending')return false;
+  r.status=action==='approve'?'approved':'declined';
+  r.decided=(from==='phone'?'On the manager phone':'On the fleet board')+' · '+nowLabel();
+  if(r.id==='FA-2201'&&action==='approve'){
+    const tr=S.trips.find(t=>t.id==='TR-1042');if(tr)tr.notes='Fuel advance approved · mock SMS to the driver';
+  }
+  if(r.id==='RP-1188'&&action==='approve'){
+    const m=S.maint.find(x=>x.id==='M-01');if(m)m.note='Parts approved · work continues in bay 2';
+  }
+  const who=r.driver?dName(r.driver):r.truck;
+  const title=(action==='approve'?'Approved':'Declined')+': '+r.title+' '+r.id;
+  const body=who+' · '+r.amount+' · '+r.where;
+  const at=nowLabel();
+  S.notifs.push({channel:'SMS',title,body,at});
+  S.notifs.push({channel:'Email',title,body,at});
+  save();
+  notifyCard(r,action);
+  render();
+  publishState();
+  toast(title);
+  return true;
+}
+
+function notifyCard(r,action){
+  const el=document.getElementById('phn');if(!el)return;
+  const ok=action==='approve';
+  el.innerHTML='<div class="h"><span class="dot"></span> '+(ok?'Request approved':'Request declined')+'</div>'+
+    '<div class="small">'+esc(r.title)+' <span class="code">'+r.id+'</span></div>'+
+    '<div class="tiny muted" style="margin:4px 0 8px">'+esc(r.truck)+(r.driver?' · '+esc(dName(r.driver)):'')+' · '+esc(r.amount)+'</div>'+
+    '<div class="ncard" style="margin-bottom:6px"><div class="ch">SMS · mock</div>Sent to the '+(r.driver?'driver':'workshop')+'. Demo only — nothing was sent.</div>'+
+    '<div class="ncard"><div class="ch">Email · mock</div>Copied to the fleet desk. Demo only — nothing was sent.</div>'+
+    '<div class="row" style="margin-top:10px"><button class="btn sm pri" data-act="gotoappr">View approvals</button><button class="btn sm" data-act="closen">Close</button></div>';
+  el.classList.add('show');clearTimeout(notifyCard._t);notifyCard._t=setTimeout(()=>el.classList.remove('show'),10000);
+}
+
+function assignDriver(truckId,driverId){
+  const t=truckBy(truckId),d=driverBy(driverId);
+  if(!t||!d)return;
+  if(t.status==='workshop'){toast('This vehicle is in the workshop and cannot be assigned.');return;}
+  if(d.licence==='expired'){toast('Cannot assign: the driver\'s licence expired on '+fmtDate(d.until)+'.');return;}
+  if(assignedTo(d.id)){toast('That driver is already on another vehicle.');return;}
+  t.driver=d.id;save();render();toast(d.name+' assigned to '+t.id);publishState();
+}
+
+/* relay */
+const Bus={
+  pub:async(topic,obj)=>{const body=JSON.stringify(obj);if(body.length>3900)return false;
+    for(let i=0;i<5;i++){try{const r=await fetch(NTFY+'/'+topic,{method:'POST',body});if(r.ok)return true;if(r.status===429){await zz(3000*(i+1));continue;}if(r.status>=400&&r.status<500)return false;}catch(e){}await zz(700*(i+1)*(i+1));}
+    return false;},
+  sub:(topic,opt)=>{let es=null,lastId=null,closed=false,retry=0,timer=null,beat=Date.now();const seen={};
+    const status=s=>opt.onStatus&&opt.onStatus(s);
+    function open(){if(closed)return;clearTimeout(timer);if(es){try{es.close()}catch(e){}}
+      const since=lastId||opt.since;es=new EventSource(NTFY+'/'+topic+'/sse'+(since?'?since='+encodeURIComponent(since):''));status('connecting');
+      es.onopen=()=>{retry=0;beat=Date.now();status('live');};
+      es.addEventListener('keepalive',()=>{beat=Date.now();});
+      es.onmessage=ev=>{beat=Date.now();let d;try{d=JSON.parse(ev.data)}catch(e){return}if(!d||d.event!=='message'||seen[d.id])return;seen[d.id]=1;lastId=d.id;
+        let m;try{m=JSON.parse(d.message)}catch(e){return}if(m&&typeof m==='object')opt.onMsg(m,d);};
+      es.onerror=()=>{status('reconnecting');try{es.close()}catch(e){}clearTimeout(timer);timer=setTimeout(open,Math.min(15000,800*Math.pow(2,retry++)));};}
+    open();const wd=setInterval(()=>{if(!closed&&Date.now()-beat>75000)open();},10000);
+    const wake=()=>{if(!closed&&(!es||es.readyState!==1))open();};
+    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')wake();});window.addEventListener('online',wake);
+    return {close:()=>{closed=true;clearInterval(wd);clearTimeout(timer);if(es)es.close();}};}
+};
+let R;try{R=JSON.parse(localStorage.getItem(RKEY));}catch(e){R=null}
+if(!R||!/^[a-z0-9]{16}$/.test(R.code||''))R={code:rid(16),since:Math.floor(Date.now()/1000)-5};
+const rsave=()=>localStorage.setItem(RKEY,JSON.stringify({code:R.code,since:R.since}));
+rsave();
+const inTopic=()=>'nota54-fleet-'+R.code+'-in';
+const outTopic=()=>'nota54-fleet-'+R.code+'-out';
+function phoneUrl(){const u=new URL('phone.html',location.href);u.search='?s='+R.code;u.hash='';return u.href;}
+let conn='connecting',sub=null;
+function setConn(s){conn=s;const d=document.getElementById('relayDot'),t=document.getElementById('relayTxt');if(d)d.className=s;
+  if(t)t.textContent=s==='live'?'Phone · live':s==='connecting'?'Phone · connecting…':'Phone · reconnecting…';}
+function onMsg(m){
+  if(!m||m.v!==1)return;
+  if(m.type==='hello'){publishState();return;}
+  if(m.type==='decision'&&(m.action==='approve'||m.action==='decline')&&m.id){decide(m.id,m.action,'phone');}
+}
+function listen(){if(sub)sub.close();sub=Bus.sub(inTopic(),{since:R.since,onStatus:setConn,onMsg});}
+function publishState(){
+  const snap={v:1,type:'state',reqs:S.reqs,notifs:S.notifs.slice(-8)};
+  try{localStorage.setItem(KEY+'-snap-'+R.code,JSON.stringify(snap));}catch(e){}
+  Bus.pub(outTopic(),snap);
+}
+window.addEventListener('storage',e=>{
+  if(e.key===KEY+'-dec-'+R.code&&e.newValue){
+    try{const m=JSON.parse(e.newValue);if(m&&m.type==='decision')decide(m.id,m.action,'phone');}catch(ex){}
+  }
+});
+setInterval(()=>{
+  try{
+    const raw=localStorage.getItem(KEY+'-dec-'+R.code);if(!raw)return;
+    const m=JSON.parse(raw);if(!m||m.type!=='decision'||!m.id||m.seen)return;
+    m.seen=1;localStorage.setItem(KEY+'-dec-'+R.code,JSON.stringify(m));
+    decide(m.id,m.action,'phone');
+  }catch(e){}
+},800);
+
+function qrModal(){
+  let svg='';try{const q=qrcode(0,'M');q.addData(phoneUrl());q.make();svg=q.createSvgTag(5,2);}catch(e){svg='<div style="color:#000;padding:20px">QR unavailable — use the link below.</div>';}
+  const box=document.getElementById('modal');
+  box.innerHTML='<div class="mbox"><div class="row" style="justify-content:space-between"><h3 style="margin:0">Manager phone view</h3><button class="btn sm" data-act="mclose">Close</button></div>'+
+    '<p class="lead" style="margin-top:10px">Scan this with a phone to approve the fuel-advance or repair request. Or open the link on a second screen.</p>'+
+    '<div style="text-align:center"><div class="qrbox">'+svg+'</div></div>'+
+    '<div class="tiny" style="margin:12px 0 8px;word-break:break-all"><a id="phUrl" href="'+esc(phoneUrl())+'" target="_blank" rel="noopener" style="color:var(--teal3)">'+esc(phoneUrl())+'</a></div>'+
+    '<div class="row"><button class="btn sm pri" data-act="copy">Copy link</button><button class="btn sm" data-act="openph">Open in a new tab</button><button class="btn sm" data-act="newsess">New session</button></div>'+
+    '<p class="tiny muted" style="margin:10px 0 0">Session <span class="code">'+R.code+'</span> · public demo relay. Do not enter confidential information.</p></div>';
+  box.classList.add('show');
+}
+
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act],[data-tab]');if(!el)return;
+  if(el.dataset.tab){UI.tab=el.dataset.tab;render();return;}
+  const a=el.dataset.act,id=el.dataset.id;
+  if(a==='sel'){UI.sel=id;if(UI.tab!=='board')UI.tab='board';render();return;}
+  if(a==='qr'){qrModal();return;}
+  if(a==='mclose'){document.getElementById('modal').classList.remove('show');return;}
+  if(a==='copy'){(navigator.clipboard?navigator.clipboard.writeText(phoneUrl()):Promise.reject()).then(()=>toast('Link copied'),()=>toast('Copy failed; select the link instead'));return;}
+  if(a==='openph'){window.open(phoneUrl(),'_blank','noopener');return;}
+  if(a==='newsess'){if(!confirm('Start a new phone session? Phones using the current QR code will stop getting updates.'))return;R={code:rid(16),since:Math.floor(Date.now()/1000)-5};rsave();listen();publishState();qrModal();toast('New phone session started');return;}
+  if(a==='reset'){if(!confirm('Reset the fleet demo to the original sample data?'))return;S=SEED();UI={tab:'board',sel:'T-01'};save();publishState();render();toast('Sample data restored');return;}
+  if(a==='approve'){decide(id,'approve','board');return;}
+  if(a==='decline'){decide(id,'decline','board');return;}
+  if(a==='assign'){const sel=document.getElementById('asgDrv');if(sel&&sel.value)assignDriver(id,sel.value);return;}
+  if(a==='gotoappr'){document.getElementById('phn').classList.remove('show');UI.tab='approvals';render();return;}
+  if(a==='closen'){document.getElementById('phn').classList.remove('show');return;}
+});
+document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')e.target.classList.remove('show');});
+
+window.__n54={S:()=>S,decide,phoneUrl,code:()=>R.code,pending,assignDriver};
+listen();publishState();render();
+})();
+</script>
+</body>
+</html>
