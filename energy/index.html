@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Nota54 — Fuel &amp; LPG Distribution (demo workspace)</title>
+<style>
+:root{--n9:#0a1628;--n85:#0e1d33;--n8:#12243f;--n7:#1a3256;--n6:#25446f;--teal:#14b8a6;--teal2:#2dd4bf;--tsoft:rgba(20,184,166,.14);--green:#22c55e;--amber:#f59e0b;--red:#ef4444;--blue:#60a5fa;--violet:#a78bfa;--text:#e6edf7;--muted:#93a4bf;--line:rgba(147,164,191,.18);--card:#0f1f38;--font:"Inter","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;--mono:ui-monospace,Menlo,Consolas,monospace}
+*{box-sizing:border-box}html,body{margin:0}
+body{font-family:var(--font);background:radial-gradient(1000px 500px at 15% -10%,rgba(20,184,166,.10),transparent 60%),var(--n9);color:var(--text);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased;min-height:100vh}
+button,input,select,textarea{font-family:inherit}
+.top{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);background:rgba(6,13,26,.85);position:sticky;top:0;z-index:20;backdrop-filter:blur(8px);flex-wrap:wrap}
+.wm{font-weight:800;font-size:21px;letter-spacing:-.02em}.wm b{color:var(--teal2)}.wm i{font-style:normal;color:var(--muted);font-weight:500;margin:0 6px}
+.sep{width:1px;height:24px;background:var(--line)}.sub{color:var(--muted);font-size:13px}.sp{flex:1}
+.pill{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;border:1px solid var(--line);white-space:nowrap}
+.pill.sample{color:#fde68a;background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.35)}
+nav.tabs{display:flex;gap:4px;padding:8px 20px 0;border-bottom:1px solid var(--line);overflow-x:auto;background:rgba(6,13,26,.5)}
+nav.tabs button{background:none;border:none;color:var(--muted);padding:10px 14px;font-weight:600;font-size:13.5px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+nav.tabs button.on{color:var(--text);border-bottom-color:var(--teal2)}
+nav.tabs button .n{display:inline-block;min-width:18px;padding:0 5px;margin-left:6px;border-radius:99px;background:rgba(239,68,68,.2);color:#fca5a5;font-size:11px}
+.wrap{padding:16px 20px 30px;max-width:1500px;margin:0 auto}
+.grid{display:grid;gap:14px}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}.g6{grid-template-columns:repeat(6,1fr)}.g21{grid-template-columns:2fr 1fr}.g12{grid-template-columns:1fr 2fr}
+@media(max-width:1000px){.top{position:static}.g2,.g3,.g4,.g21,.g12{grid-template-columns:1fr}.g6{grid-template-columns:repeat(2,1fr)}}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.025),transparent),var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-width:0}
+h2{margin:0 0 4px;font-size:18px;letter-spacing:-.01em}h3{margin:0 0 10px;font-size:14px}
+.lead{color:var(--muted);font-size:13px;margin:0 0 14px}
+.kpi .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.kpi .v{font-size:23px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.kpi .s{font-size:11.5px;color:var(--muted)}
+.kpi.hl{border-color:rgba(45,212,191,.5)}.kpi.hl .v{color:var(--teal2)}.kpi.warn{border-color:rgba(239,68,68,.5)}.kpi.warn .v{color:#fca5a5}
+.muted{color:var(--muted)}.tiny{font-size:11.5px}.small{font-size:12.5px}.code{font-family:var(--mono);font-size:12px;color:var(--teal2)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--n6);background:var(--n8);color:var(--text);padding:6px 11px;border-radius:9px;font-weight:600;font-size:12.5px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--teal)}.btn.pri{background:linear-gradient(135deg,var(--teal),#0ea5a0);color:#03201c;border-color:transparent}
+.btn.warn{border-color:rgba(245,158,11,.6);color:#fcd34d}.btn.danger{border-color:rgba(239,68,68,.6);color:#fca5a5}.btn.sm{padding:3px 8px;font-size:11.5px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+label.f{display:flex;flex-direction:column;gap:3px;font-size:11.5px;color:var(--muted)}
+input,select,textarea{background:var(--n85);border:1px solid var(--n6);color:var(--text);padding:7px 9px;border-radius:8px;font-size:13px}
+input[type=number]{width:110px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600;border:1px solid var(--line);white-space:nowrap}
+.chip.ok{color:#86efac;border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.1)}
+.chip.amber{color:#fcd34d;border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.12)}
+.chip.red{color:#fca5a5;border-color:rgba(239,68,68,.45);background:rgba(239,68,68,.12)}
+.chip.teal{color:var(--teal2);border-color:rgba(45,212,191,.4);background:var(--tsoft)}
+.chip.blue{color:#bfdbfe;border-color:rgba(96,165,250,.45);background:rgba(96,165,250,.12)}
+.chip.grey{color:var(--muted)}
+table.t{width:100%;border-collapse:collapse;font-size:12.8px}
+table.t th,table.t td{padding:8px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.t th{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+table.t td.n,table.t th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bar{height:7px;border-radius:9px;background:rgba(147,164,191,.15);overflow:hidden;margin-top:4px;min-width:70px}.bar i{display:block;height:100%;background:var(--teal)}
+.bar i.low{background:var(--red)}.bar i.mid{background:var(--amber)}
+.steps{display:flex;gap:3px;flex-wrap:wrap;margin-top:6px}
+.steps span{font-size:10.5px;padding:2px 7px;border-radius:6px;background:rgba(147,164,191,.1);color:var(--muted);white-space:nowrap}
+.steps span.d{background:rgba(34,197,94,.14);color:#86efac}.steps span.c{background:var(--tsoft);color:var(--teal2);outline:1px solid var(--teal)}.steps span.x{background:rgba(239,68,68,.15);color:#fca5a5}
+.alert{display:flex;gap:10px;align-items:flex-start;padding:9px 10px;border-radius:10px;border:1px solid rgba(239,68,68,.35);background:rgba(239,68,68,.07);margin-bottom:8px;font-size:12.8px}
+.alert.amber{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.07)}
+.alert.done{opacity:.5}
+.alert .sp{flex:1}
+.banner{margin:0 0 14px;padding:8px 12px;border-radius:10px;border:1px dashed rgba(245,158,11,.45);color:#fde68a;background:rgba(245,158,11,.06);font-size:12.5px}
+.sec{display:none}.sec.on{display:block}
+.toast{position:fixed;right:18px;bottom:18px;background:var(--n8);border:1px solid var(--teal);padding:10px 14px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.4);opacity:0;transform:translateY(10px);transition:.3s;z-index:80;font-size:13px;pointer-events:none;max-width:380px}
+.toast.show{opacity:1;transform:none}.toast.bad{border-color:var(--red)}
+.modal{position:fixed;inset:0;background:rgba(2,6,14,.7);display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
+.modal.on{display:flex}.modal .box{background:var(--n85);border:1px solid var(--n6);border-radius:14px;max-width:880px;width:100%;max-height:92vh;display:flex;flex-direction:column}
+.modal .hd{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}.modal .bd{padding:14px 16px;overflow:auto}
+.modal iframe{width:100%;height:68vh;border:0;background:#fff;border-radius:8px}
+svg text{fill:var(--muted);font-size:10px;font-family:var(--font)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.phone{width:270px;margin:0 auto;border:10px solid #0b0f18;border-radius:30px;background:#111;padding:14px 12px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+.phone .scr{background:#cfe3d0;color:#102010;font-family:var(--mono);font-size:12.5px;min-height:200px;border-radius:6px;padding:10px;white-space:pre-wrap}
+.phone .keys{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.phone .keys button{background:#222b3a;color:#fff;border:none;border-radius:8px;padding:9px 0;font-size:15px;cursor:pointer}
+.phone .inp{display:flex;gap:6px;margin-top:8px}.phone .inp input{flex:1;font-family:var(--mono);background:#0b0f18}
+.int{border-left:3px solid var(--n6)}.int.plan{border-left-color:var(--amber)}.int.now{border-left-color:var(--green)}
+pre.json{background:var(--n9);border:1px solid var(--line);border-radius:8px;padding:10px;font-size:11.5px;overflow:auto;color:#cbd5e1}
+.foot{padding:0 20px 24px;font-size:11.5px;color:var(--muted);text-align:center}
+.tile{padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--n85)}
+.cart{min-height:60px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wm">Nota<b>54</b></div>
+  <div class="sep"></div>
+  <div class="sub"><b style="color:var(--text)">Fuel &amp; LPG Distribution</b> · demo workspace</div>
+  <div class="sp"></div>
+  <span class="pill" id="clock"></span>
+  <label class="pill" title="Display currency. Conversion uses illustrative rates, not live FX.">Currency <select id="cur" style="padding:2px 6px;font-size:12px"></select></label>
+  <span class="pill sample">Sample data</span>
+  <button class="btn sm" data-act="reset" title="Reload the original sample data">Reset demo</button>
+</header>
+<nav class="tabs" id="tabs">
+  <button data-tab="dash" class="on">Executive dashboard</button>
+  <button data-tab="docs">Document trail</button>
+  <button data-tab="inv">Inventory &amp; sites</button>
+  <button data-tab="cli">Clients &amp; sales</button>
+  <button data-tab="disp">Delivery &amp; dispatch</button>
+  <button data-tab="intg">Integrations</button>
+</nav>
+<main class="wrap">
+  <div class="banner">Demo workspace for a fuel &amp; LPG import and distribution business. All companies, people, vehicles, documents, prices and volumes are <b>sample/fictional</b>, prepared to show how Nota54 works. Currency conversion uses illustrative rates, not live exchange rates.</div>
+  <section class="sec on" id="s-dash"></section>
+  <section class="sec" id="s-docs"></section>
+  <section class="sec" id="s-inv"></section>
+  <section class="sec" id="s-cli"></section>
+  <section class="sec" id="s-disp"></section>
+  <section class="sec" id="s-intg"></section>
+</main>
+<div class="foot">Nota54 by Trublshut · demo workspace · sample data stored only in this browser (localStorage) · use “Reset demo” to start over</div>
+<div class="modal" id="modal"><div class="box"><div class="hd"><b id="mTitle"></b><div class="sp" style="flex:1"></div><span id="mActs"></span><button class="btn sm" data-act="mclose">Close</button></div><div class="bd" id="mBody"></div></div></div>
+<div class="toast" id="toast"></div>
+<script>
+/* Nota54 · Fuel & LPG Distribution demo workspace. All data is sample/fictional. */
+'use strict';
+const KEY='n54-energy-demo-v1';
+const CURS={USD:{s:'USD',r:1},GHS:{s:'GHS',r:11},KES:{s:'KES',r:129},NGN:{s:'NGN',r:1500},ZAR:{s:'ZAR',r:18},EUR:{s:'EUR',r:0.92}}; // illustrative rates only
+let CUR='USD';
+const SKU={
+  PMS:{n:'PMS · Petrol',u:'L',p:1.18,cat:'fuel',col:'#60a5fa'},
+  AGO:{n:'AGO · Diesel',u:'L',p:1.25,cat:'fuel',col:'#a78bfa'},
+  LPGB:{n:'LPG bulk',u:'kg',p:1.22,cat:'lpg',col:'#2dd4bf'},
+  C6:{n:'LPG cylinder 6 kg',u:'cyl',p:7.75,kg:6,cat:'cyl',col:'#f59e0b'},
+  C13:{n:'LPG cylinder 13 kg',u:'cyl',p:16.80,kg:13,cat:'cyl',col:'#fb923c'},
+  C50:{n:'LPG cylinder 50 kg',u:'cyl',p:64.50,kg:50,cat:'cyl',col:'#f472b6'}
+};
+const SKUS=Object.keys(SKU), CYLS=['C6','C13','C50'];
+const SITES={
+  TRM:{n:'Main Import Terminal / Depot',s:'Terminal / Depot',t:'Bulk storage · receives imports (BOL)'},
+  PLT:{n:'LPG Bottling Plant',s:'Bottling Plant',t:'Bulk LPG → cylinder filling · empties returned here'},
+  OUT1:{n:'Retail Outlet 1',s:'Retail Outlet 1',t:'Fuel + autogas + cylinder exchange cage'},
+  SWP2:{n:'Swap-and-Go Station 2',s:'Swap-and-Go 2',t:'Cylinder exchange point (partner forecourt)'}
+};
+const SITEIDS=Object.keys(SITES);
+const TOL={fuel:0.5,lpg:0.5}; // % tolerance for volume variance (configurable)
+
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const num=(n,d=0)=>Number(n).toLocaleString('en-GB',{minimumFractionDigits:d,maximumFractionDigits:d});
+const money=n=>CURS[CUR].s+' '+num(n*CURS[CUR].r,2);
+const money0=n=>CURS[CUR].s+' '+num(n*CURS[CUR].r,0);
+const M=n=>'⟦m:'+n+'⟧'; // money token, rendered in the selected currency
+const mtxt=s=>String(s).replace(/⟦m:([-0-9.]+)⟧/g,(_,v)=>money0(+v));
+function fq(sku,q){const u=SKU[sku].u;if(u==='L')return num(q)+' L';if(u==='kg')return Math.abs(q)>=1000?num(q/1000,Math.abs(q)%1000?2:1)+' MT':num(q)+' kg';return num(q)+' cyl';}
+function rng(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;}}
+function today(){const d=new Date();return d;}
+function dstr(d){return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+function tstr(d){d=new Date(d);const t=d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});return d.toDateString()===new Date().toDateString()?t:d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' '+t;}
+function dayLabel(i){const d=new Date();d.setDate(d.getDate()-(13-i));return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'});}
+const yymm=()=>{const d=new Date();return String(d.getFullYear()).slice(2)+String(d.getMonth()+1).padStart(2,'0');};
+function nextNo(prefix){S.seq[prefix]=(S.seq[prefix]||0)+1;return prefix+'-'+yymm()+'-'+String(S.seq[prefix]).padStart(3,'0');}
+function lineAmt(items){return items.reduce((a,i)=>a+i.q*SKU[i.sku].p,0);}
+function itemsTxt(items){return items.map(i=>fq(i.sku,i.q)+' '+SKU[i.sku].n.replace('LPG cylinder ','').replace(' · ',' ')).join(', ');}
+
+/* ---------- seed ---------- */
+function seed(){
+  const r=rng(54023);
+  const stock={
+    TRM:{PMS:1412000,AGO:1876500,LPGB:968400,C6:0,C13:0,C50:0},
+    PLT:{PMS:0,AGO:0,LPGB:142600,C6:1840,C13:2310,C50:286},
+    OUT1:{PMS:38200,AGO:44750,LPGB:11800,C6:96,C13:142,C50:18},
+    SWP2:{PMS:0,AGO:0,LPGB:0,C6:58,C13:41,C50:0}
+  };
+  const cap={
+    TRM:{PMS:2000000,AGO:2500000,LPGB:1500000},PLT:{LPGB:250000,C6:3000,C13:3500,C50:500},
+    OUT1:{PMS:60000,AGO:60000,LPGB:20000,C6:160,C13:220,C50:40},SWP2:{C6:120,C13:120}
+  };
+  const reorder={TRM:{PMS:400000,AGO:500000,LPGB:300000},PLT:{LPGB:60000,C6:600,C13:700,C50:80},OUT1:{PMS:15000,AGO:15000,LPGB:5000,C6:40,C13:60,C50:8},SWP2:{C6:30,C13:45}};
+  const empties={PLT:{C6:620,C13:780,C50:64},OUT1:{C6:38,C13:61,C50:9},SWP2:{C6:27,C13:52,C50:0}};
+  // cylinder fleet with customers (in circulation) - sample
+  const withCust={C6:5200,C13:7400,C50:610};
+  // 14 days sales history (base units)
+  const base={PMS:17800,AGO:25600,LPGB:8600,C6:138,C13:204,C50:31};
+  const hist=[];for(let i=0;i<14;i++){const o={};const dow=(new Date(Date.now()-(13-i)*864e5)).getDay();const wk=dow===0?0.72:dow===6?0.88:1;
+    for(const k of SKUS){o[k]=Math.round(base[k]*wk*(0.86+r()*0.28)*(1+i*0.006));}hist.push(o);}
+  hist[13]={PMS:9480,AGO:13920,LPGB:4210,C6:71,C13:109,C50:14}; // today so far
+  const channels7={'Walk-in / exchange':0,'Home delivery':0,'USSD':0,'Mobile app':0};
+  const ch=[0.58,0.17,0.15,0.10];let tot=0;for(let i=7;i<14;i++)tot+=hist[i].C6+hist[i].C13+hist[i].C50;
+  Object.keys(channels7).forEach((k,i)=>channels7[k]=Math.round(tot*ch[i]));
+  const clients=[
+    {id:'GPH',n:'Golden Palm Hotel',seg:'Hotel',terms:'Credit · 30 days',limit:5500,out:2040,city:'City centre (sample)',v30:4250,v30p:3750,main:'C50'},
+    {id:'CCL',n:'Coastline Ceramics Ltd',seg:'Factory',terms:'Credit · 30 days',limit:22700,out:19300,city:'Industrial area (sample)',v30:16900,v30p:18300,main:'LPGB'},
+    {id:'SHL',n:'SwiftHaul Logistics',seg:'Fleet account',terms:'Credit · 14 days',limit:36400,out:10800,city:'Logistics park (sample)',v30:28400,v30p:25200,main:'AGO'},
+    {id:'MPF',n:'Meridian Poultry Farms',seg:'Factory',terms:'Credit · 30 days',limit:10900,out:2890,city:'Farm belt (sample)',v30:8000,v30p:7200,main:'LPGB'},
+    {id:'CVR',n:'Cityview Restaurant Group',seg:'Hotel / restaurant',terms:'Credit · 14 days',limit:2700,out:2510,city:'City centre (sample)',v30:1990,v30p:2130,main:'C50'},
+    {id:'BSS',n:'Bayside Schools Trust',seg:'Institution',terms:'Prepayment',limit:0,out:0,city:'Suburb (sample)',v30:1290,v30p:890,main:'C50'},
+    {id:'MTX',n:'MetroTaxi Autogas Fleet',seg:'Fleet account',terms:'Credit · 7 days',limit:7300,out:1130,city:'City centre (sample)',v30:5330,v30p:4300,main:'LPGB'}
+  ];
+  const retail=[
+    {n:'A. Mensah (sample)',ph:'+••• ••• 1182',ch:'Home delivery',last:'C13',orders:14},
+    {n:'K. Odhiambo (sample)',ph:'+••• ••• 7740',ch:'USSD',last:'C6',orders:9},
+    {n:'Walk-in customer',ph:'—',ch:'Walk-in / exchange',last:'C13',orders:0},
+    {n:'E. Banda (sample)',ph:'+••• ••• 3391',ch:'Mobile app',last:'C13',orders:22},
+    {n:'Y. Adeyemi (sample)',ph:'+••• ••• 5508',ch:'Walk-in / exchange',last:'C6',orders:6}
+  ];
+  const now=Date.now();
+  const bols=[
+    {id:'BOL-SAMPLE-0417',vessel:'MT Sample Horizon',sku:'LPGB',blq:1200000,port:'Port of entry (sample)',eta:'arrived',rcv:1195200,status:'reconciled',note:'Within tolerance',ts:now-3*864e5},
+    {id:'BOL-SAMPLE-0422',vessel:'MT Example Star',sku:'PMS',blq:1850000,port:'Port of entry (sample)',eta:'arrived',rcv:1838900,status:'received',note:'',ts:now-1*864e5},
+    {id:'BOL-SAMPLE-0425',vessel:'MT Demo Pioneer',sku:'AGO',blq:2100000,port:'Port of entry (sample)',eta:'discharging',rcv:null,status:'logged',note:'',ts:now-5*36e5}
+  ];
+  const lpos=[
+    {id:'LPO-SHL-7781',cl:'SHL',items:[{sku:'AGO',q:18000}],from:'TRM',status:'dispatched',pf:'PF-SAMPLE-031',inv:'INV-SAMPLE-118',dn:'DN-SAMPLE-118',paid:'LPO approved (credit)',ts:now-26*36e5},
+    {id:'LPO-GPH-0412',cl:'GPH',items:[{sku:'C50',q:20}],from:'PLT',status:'proforma',pf:'PF-SAMPLE-034',ts:now-7*36e5},
+    {id:'LPO-BSS-0057',cl:'BSS',items:[{sku:'C50',q:12}],from:'PLT',status:'proforma',pf:'PF-SAMPLE-035',ts:now-5*36e5},
+    {id:'LPO-MPF-0098',cl:'MPF',items:[{sku:'LPGB',q:4500}],from:'PLT',status:'received',ts:now-2*36e5},
+    {id:'LPO-CCL-2210',cl:'CCL',items:[{sku:'LPGB',q:8000}],from:'TRM',status:'blocked',ts:now-90*6e4,block:'Credit limit exceeded'},
+    {id:'LPO-MTX-0310',cl:'MTX',items:[{sku:'LPGB',q:3000}],from:'TRM',status:'delivered',pf:'PF-SAMPLE-029',inv:'INV-SAMPLE-114',dn:'DN-SAMPLE-114',paid:'LPO approved (credit)',pod:{by:'J. Tembo (sample)',q:3000,at:now-20*36e5},ts:now-30*36e5}
+  ];
+  const fleet=[
+    {id:'TK-01',type:'lpg',n:'Bulk LPG tanker · 20 MT',plate:'GT 0000-21 (sample)',cap:20000,driver:'Driver K. Adu (sample)',status:'available',odo:184220,svc:190000},
+    {id:'TK-02',type:'fuel',n:'Fuel tanker · 36,000 L',plate:'GT 0001-20 (sample)',cap:36000,driver:'Driver Y. Musa (sample)',status:'on trip',odo:241880,svc:245000},
+    {id:'TK-03',type:'fuel',n:'Fuel tanker · 27,000 L',plate:'GT 0002-22 (sample)',cap:27000,driver:'Driver P. Banda (sample)',status:'available',odo:96410,svc:100000},
+    {id:'CT-01',type:'cyl',n:'Cylinder truck · 240 cyl',plate:'GT 0003-23 (sample)',cap:240,driver:'Driver A. Okoro (sample)',status:'available',odo:61270,svc:70000},
+    {id:'TK-04',type:'lpg',n:'Bulk LPG tanker · 15 MT',plate:'GT 0006-23 (sample)',cap:15000,driver:'Driver S. Owino (sample)',status:'available',odo:72310,svc:80000},
+    {id:'MB-01',type:'bike',n:'Delivery tricycle · 8 cyl',plate:'M-0004 (sample)',cap:8,driver:'Rider E. Kamau (sample)',status:'available',odo:18840,svc:20000},
+    {id:'MB-02',type:'bike',n:'Delivery tricycle · 8 cyl',plate:'M-0005 (sample)',cap:8,driver:'Rider N. Lungu (sample)',status:'available',odo:22105,svc:22500},
+    {id:'MB-03',type:'bike',n:'Delivery tricycle · 8 cyl',plate:'M-0007 (sample)',cap:8,driver:'Rider F. Diallo (sample)',status:'available',odo:9120,svc:15000}
+  ];
+  const trips=[
+    {id:'TRP-SAMPLE-0091',kind:'bulk',ref:'LPO-SHL-7781',dn:'DN-SAMPLE-118',truck:'TK-02',driver:'Driver Y. Musa (sample)',from:'TRM',to:'SwiftHaul Logistics yard (sample)',items:[{sku:'AGO',q:18000}],status:'transit',loadedAt:now-3*36e5,eta:'about 40 min (sample)'},
+    {id:'TRP-SAMPLE-0088',kind:'bulk',ref:'LPO-MTX-0310',dn:'DN-SAMPLE-114',truck:'TK-01',driver:'Driver K. Adu (sample)',from:'TRM',to:'MetroTaxi autogas skid (sample)',items:[{sku:'LPGB',q:3000}],status:'delivered',pod:{by:'J. Tembo (sample)',q:3000,at:now-20*36e5}}
+  ];
+  const orders=[
+    {id:'ORD-SAMPLE-2201',ch:'Mobile app',cust:'E. Banda (sample)',addr:'Zone 3 (sample)',items:[{sku:'C13',q:1}],site:'OUT1',status:'queued',ts:now-25*6e4,pay:'Mobile money (mock) · paid'},
+    {id:'ORD-SAMPLE-2202',ch:'USSD',cust:'K. Odhiambo (sample)',addr:'Zone 7 (sample)',items:[{sku:'C6',q:2}],site:'SWP2',status:'queued',ts:now-12*6e4,pay:'Pay on delivery'}
+  ];
+  const alerts=[
+    {id:1,lvl:'red',area:'Import',txt:'BOL-SAMPLE-0422 (PMS): terminal receipt 1,838,900 L vs BOL 1,850,000 L. Run reconciliation (tolerance '+TOL.fuel+'%).',ts:now-1*864e5,open:true},
+    {id:2,lvl:'red',area:'Credit',txt:'LPO-CCL-2210 blocked: Coastline Ceramics would exceed credit limit ('+M(22700)+').',ts:now-90*6e4,open:true},
+    {id:3,lvl:'amber',area:'Stock',txt:'Swap-and-Go Station 2: 13 kg filled cylinders (41) are close to reorder level (45).',ts:now-40*6e4,open:true}
+  ];
+  const moves=[
+    {ts:now-6*36e5,from:'TRM',to:'PLT',sku:'LPGB',q:18000,ref:'Transfer · TK-01'},
+    {ts:now-5*36e5,from:'PLT',to:'OUT1',sku:'C13',q:80,ref:'Transfer · CT-01'},
+    {ts:now-4*36e5,from:'SWP2',to:'PLT',sku:'C13',q:46,ref:'Empties return',empty:true}
+  ];
+  return {v:1,stock,cap,reorder,empties,withCust,hist,channels7,clients,retail,bols,lpos,fleet,trips,orders,alerts,moves,seq:{},sales:[],aid:10,cart:[],ussd:null};
+}
+let S;
+function load(){try{S=JSON.parse(localStorage.getItem(KEY));}catch(e){S=null}if(!S||S.v!==1)S=seed();}
+function save(){localStorage.setItem(KEY,JSON.stringify(S));}
+function alertAdd(lvl,area,txt){S.alerts.unshift({id:++S.aid,lvl,area,txt,ts:Date.now(),open:true});}
+function toast(t,bad){const e=$('#toast');e.textContent=t;e.className='toast show'+(bad?' bad':'');clearTimeout(toast.h);toast.h=setTimeout(()=>e.className='toast',3200);}
+const client=id=>S.clients.find(c=>c.id===id);
+function recordSale(items,channel,cust){const d=S.hist[13];items.forEach(i=>d[i.sku]=(d[i.sku]||0)+i.q);
+  if(channel&&S.channels7[channel]!=null){S.channels7[channel]+=items.filter(i=>CYLS.includes(i.sku)).reduce((a,i)=>a+i.q,0);}}
+function lowCheck(site,sku){const ro=(S.reorder[site]||{})[sku];if(ro!=null&&S.stock[site][sku]<ro&&!S.alerts.some(a=>a.open&&a.key===site+sku)){alertAdd('amber','Stock',SITES[site].n+': '+SKU[sku].n+' at '+fq(sku,S.stock[site][sku])+', below reorder level '+fq(sku,ro)+'.');S.alerts[0].key=site+sku;}}
+
+/* ---------- actions: import / BOL ---------- */
+const A={};
+A.bolNew=f=>{const sku=f.sku,blq=sku==='LPGB'?Math.round(+f.qty*1000):Math.round(+f.qty);if(!(blq>0)||!f.vessel)return toast('Enter vessel and BOL quantity',1);
+  const id='BOL-SAMPLE-'+String(430+S.bols.length).padStart(4,'0');S.bols.unshift({id,vessel:f.vessel,sku,blq,port:'Port of entry (sample)',eta:'discharging',rcv:null,status:'logged',note:'',ts:Date.now()});toast(id+' logged. Next: record terminal receipt.');};
+A.bolReceive=(id,v)=>{const b=S.bols.find(x=>x.id===id);let q=b.sku==='LPGB'?Math.round(+v*1000):Math.round(+v);if(!(q>0))return toast('Enter the received quantity',1);b.rcv=q;b.status='received';b.eta='arrived';toast('Terminal receipt recorded for '+id+'. Run reconciliation.');};
+A.bolRecon=id=>{const b=S.bols.find(x=>x.id===id);const diff=b.rcv-b.blq,pct=diff/b.blq*100;const tol=SKU[b.sku].cat==='fuel'?TOL.fuel:TOL.lpg;
+  b.var=diff;b.varPct=pct;S.stock.TRM[b.sku]+=b.rcv;S.moves.unshift({ts:Date.now(),from:'IMPORT',to:'TRM',sku:b.sku,q:b.rcv,ref:id+' (received qty posted)'});
+  S.alerts.forEach(a=>{if(a.open&&a.txt.startsWith(id))a.open=false;});
+  if(Math.abs(pct)>tol){b.status='variance';b.note='Outside tolerance ('+tol+'%): claim / survey report needed';alertAdd('red','Import',id+' ('+b.sku+'): variance '+fq(b.sku,diff)+' ('+num(pct,2)+'%) is outside the '+tol+'% tolerance. Raise claim with supplier / surveyor.');toast('Variance outside tolerance: alert raised',1);}
+  else{b.status='reconciled';b.note='Within tolerance';toast(id+' reconciled within tolerance. Stock posted to Terminal.');}};
+A.bolClose=id=>{const b=S.bols.find(x=>x.id===id);b.status='reconciled';b.note='Variance accepted · claim CLM-'+id.slice(-4)+' raised (sample)';S.alerts.forEach(a=>{if(a.open&&a.txt.startsWith(id))a.open=false;});toast('Variance claim logged and BOL closed');};
+
+/* ---------- actions: LPO → proforma → invoice + DN ---------- */
+function exposure(c){return c.out+S.lpos.filter(l=>l.cl===c.id&&['proforma','approved'].includes(l.status)).reduce((a,l)=>a+lineAmt(l.items),0);}
+function creditCheck(l){const c=client(l.cl),amt=lineAmt(l.items);if(c.terms==='Prepayment')return {ok:true,prepay:true};const exp=exposure(c);return {ok:exp+amt<=c.limit,exp,amt,limit:c.limit,avail:c.limit-exp};}
+A.lpoNew=f=>{const c=client(f.cl);const sku=f.sku;let q=+f.qty;if(!(q>0))return toast('Enter quantity',1);if(sku==='LPGB')q=Math.round(q*1000);
+  const id='LPO-'+c.id+'-'+String(Math.floor(1000+Math.random()*8999));const from=CYLS.includes(sku)||sku==='LPGB'&&q<=6000?'PLT':'TRM';
+  const l={id,cl:c.id,items:[{sku,q}],from:sku==='LPGB'?'TRM':CYLS.includes(sku)?'PLT':'TRM',status:'received',ts:Date.now()};S.lpos.unshift(l);A.lpoCheck(id);};
+A.lpoCheck=id=>{const l=S.lpos.find(x=>x.id===id);const r=creditCheck(l);const c=client(l.cl);
+  if(r.ok){l.status='checked';l.block=null;toast(id+': credit check passed'+(r.prepay?' (prepayment client: proforma needed)':' · available '+money0(r.avail)));}
+  else{l.status='blocked';l.block='Credit limit exceeded';alertAdd('red','Credit',id+' blocked: '+c.n+' exposure '+M(r.exp)+' + this LPO '+M(r.amt)+' > limit '+M(r.limit)+'.');toast(id+' blocked: over credit limit',1);}};
+A.lpoOverride=id=>{const why=prompt('Manager override reason (logged in audit trail):','Payment of overdue invoices confirmed by Finance');if(!why)return;const l=S.lpos.find(x=>x.id===id);l.status='checked';l.override=why;l.block=null;S.alerts.forEach(a=>{if(a.open&&a.txt.startsWith(id))a.open=false;});toast('Override logged. LPO released for proforma.');};
+A.lpoProforma=id=>{const l=S.lpos.find(x=>x.id===id);l.pf=nextNo('PF');l.status='proforma';toast(l.pf+' generated');showDoc('pf',id);};
+A.lpoConfirm=(id,how)=>{const l=S.lpos.find(x=>x.id===id);const c=client(l.cl);const src=S.stock[l.from];
+  for(const i of l.items){if(src[i.sku]<i.q)return toast('Not enough '+SKU[i.sku].n+' at '+SITES[l.from].n,1);}
+  l.paid=how==='pay'?'Prepayment received (mock MoMo/bank ref PAY-'+Math.floor(10000+Math.random()*89999)+')':'LPO approved (credit)';
+  l.inv=nextNo('INV');l.dn=nextNo('DN');l.status='invoiced';if(how!=='pay')c.out+=lineAmt(l.items);
+  recordSale(l.items);toast(l.inv+' + '+l.dn+' issued. Ready for dispatch.');};
+
+/* ---------- actions: inventory ---------- */
+A.transfer=f=>{let q=+f.qty;const sku=f.sku;if(sku==='LPGB')q=Math.round(q*1000);if(!(q>0)||f.from===f.to)return toast('Check quantity and sites',1);
+  if(S.stock[f.from][sku]<q)return toast('Not enough stock at '+SITES[f.from].n,1);
+  const capTo=(S.cap[f.to]||{})[sku];if(capTo==null)return toast(SITES[f.to].n+' does not hold '+SKU[sku].n,1);
+  if(S.stock[f.to][sku]+q>capTo)return toast('Exceeds capacity at '+SITES[f.to].n+' ('+fq(sku,capTo)+')',1);
+  S.stock[f.from][sku]-=q;S.stock[f.to][sku]+=q;S.moves.unshift({ts:Date.now(),from:f.from,to:f.to,sku,q,ref:'Transfer · '+nextNo('TRF')});lowCheck(f.from,sku);toast('Moved '+fq(sku,q)+' '+SITES[f.from].s+' → '+SITES[f.to].s);};
+A.fill=f=>{const sku=f.sku,n=Math.round(+f.qty);if(!(n>0))return toast('Enter cylinders to fill',1);const kg=n*SKU[sku].kg;
+  if(S.empties.PLT[sku]<n)return toast('Only '+S.empties.PLT[sku]+' empty '+SKU[sku].kg+' kg cylinders at the plant',1);
+  if(S.stock.PLT.LPGB<kg)return toast('Not enough bulk LPG at the plant',1);
+  S.empties.PLT[sku]-=n;S.stock.PLT.LPGB-=kg;S.stock.PLT[sku]+=n;S.moves.unshift({ts:Date.now(),from:'PLT',to:'PLT',sku,q:n,ref:'Filling batch '+nextNo('FIL')+' · '+num(kg)+' kg LPG used'});lowCheck('PLT','LPGB');toast('Filled '+n+' × '+SKU[sku].kg+' kg ('+num(kg)+' kg bulk LPG)');};
+A.empties=f=>{const sku=f.sku,n=Math.round(+f.qty);if(!(n>0))return;if(S.empties[f.from][sku]<n)return toast('Only '+S.empties[f.from][sku]+' empties at '+SITES[f.from].s,1);
+  S.empties[f.from][sku]-=n;S.empties.PLT[sku]+=n;S.moves.unshift({ts:Date.now(),from:f.from,to:'PLT',sku,q:n,ref:'Empties return',empty:true});toast(n+' empty '+SKU[sku].kg+' kg cylinders returned to the plant');};
+A.count=f=>{const sku=f.sku,site=f.site;let c=+f.qty;if(sku==='LPGB')c=Math.round(c*1000);if(!(c>=0)||f.qty==='')return toast('Enter the physical count / dip',1);
+  if((S.cap[site]||{})[sku]==null)return toast(SITES[site].n+' does not hold '+SKU[sku].n,1);
+  const book=S.stock[site][sku],diff=c-book,pct=book?diff/book*100:0;S.stock[site][sku]=c;
+  S.moves.unshift({ts:Date.now(),from:site,to:site,sku,q:diff,ref:'Stock count adjustment ('+(diff>=0?'+':'')+fq(sku,diff)+')'});
+  const isCyl=CYLS.includes(sku);const bad=isCyl?diff!==0:Math.abs(pct)>TOL[SKU[sku].cat==='fuel'?'fuel':'lpg'];
+  if(bad){alertAdd('red','Variance',SITES[site].n+': '+SKU[sku].n+' count '+fq(sku,c)+' vs book '+fq(sku,book)+' → '+(diff>=0?'+':'')+fq(sku,diff)+(isCyl?'':' ('+num(pct,2)+'%)')+'. Investigate.');toast('Variance alert raised',1);}
+  else toast('Count matches book within tolerance');};
+
+/* ---------- actions: retail POS / USSD ---------- */
+A.cartAdd=(sku,mode)=>{const e=S.cart.find(x=>x.sku===sku&&x.mode===mode);if(e)e.q++;else S.cart.push({sku,mode,q:1});};
+const DEPOSIT={C6:23,C13:38,C50:100}; // sample new-cylinder deposit
+function cartTotal(){return S.cart.reduce((a,i)=>a+i.q*(SKU[i.sku].p+(i.mode==='new'?DEPOSIT[i.sku]:0)),0);}
+A.checkout=f=>{if(!S.cart.length)return toast('Cart is empty',1);const site=f.site;
+  for(const i of S.cart){const need=S.cart.filter(x=>x.sku===i.sku).reduce((a,x)=>a+x.q,0);if(S.stock[site][i.sku]<need)return toast('Not enough '+SKU[i.sku].n+' at '+SITES[site].s,1);}
+  const items=[];S.cart.forEach(i=>{S.stock[site][i.sku]-=i.q;if(i.mode==='swap')S.empties[site][i.sku]+=i.q;else S.withCust[i.sku]+=i.q;items.push({sku:i.sku,q:i.q});lowCheck(site,i.sku);});
+  const total=cartTotal();const rc=nextNo('RCP');const deliv=f.mode==='delivery';
+  recordSale(items,deliv?'Home delivery':'Walk-in / exchange');
+  if(deliv){S.orders.unshift({id:nextNo('ORD'),ch:'Home delivery',cust:f.cust||'Retail customer (sample)',addr:f.addr||'Address on file (sample)',items,site,status:'queued',ts:Date.now(),pay:f.pay+' · paid',rc});}
+  const lines=S.cart.map(i=>({...i}));S.cart=[];save();render();
+  openModal('Receipt '+rc,'<div class="tile" style="font-family:var(--mono);font-size:12.5px;max-width:360px">NOTA54 · FUEL &amp; LPG (DEMO)<br>'+esc(SITES[site].n)+'<br>'+new Date().toLocaleString('en-GB')+'<br>Receipt '+rc+'<br>------------------------------<br>'+lines.map(i=>i.q+' × '+SKU[i.sku].n.replace('LPG cylinder ','')+' '+(i.mode==='swap'?'refill (exchange)':'new + deposit')+'<br>&nbsp;&nbsp;'+money(i.q*(SKU[i.sku].p+(i.mode==='new'?DEPOSIT[i.sku]:0)))).join('<br>')+'<br>------------------------------<br><b>TOTAL '+money(total)+'</b><br>Paid: '+esc(f.pay)+(f.pay.startsWith('Mobile')?' (mock, no real payment)':'')+'<br>'+(deliv?'Delivery order created → Dispatch':'Walk-in · handed over')+'<br><br>SAMPLE RECEIPT · NOT A TAX DOCUMENT</div>');};
+const USSD_CODE='*000*54#';
+function ussdScreen(){const u=S.ussd;if(!u)return 'Dial '+USSD_CODE+'\n(demo code, not a live USSD service)';
+  const sz={1:'C6',2:'C13',3:'C50'};
+  if(u.st==='menu')return 'Fuel & LPG (DEMO)\n1. Order LPG refill\n2. Track my order\n3. Nearest exchange point';
+  if(u.st==='size')return 'Choose cylinder:\n1. 6 kg  '+money(SKU.C6.p)+'\n2. 13 kg '+money(SKU.C13.p)+'\n3. 50 kg '+money(SKU.C50.p);
+  if(u.st==='qty')return SKU[u.sku].n+'\nEnter quantity (1-5):';
+  if(u.st==='pay')return 'Deliver to saved address:\nZone 7 (sample)\n'+u.q+' × '+SKU[u.sku].kg+' kg = '+money(u.q*SKU[u.sku].p)+'\n1. Pay with Mobile Money\n2. Pay on delivery';
+  if(u.st==='done')return 'Order '+u.id+' received.\n'+(u.pay==='1'?'MoMo prompt sent (mock).':'Pay on delivery.')+'\nA rider will call you.\nThank you.';
+  if(u.st==='track'){const o=S.orders.find(x=>x.ch==='USSD');return o?'Order '+o.id+':\n'+({queued:'Received, awaiting rider',assigned:'Rider assigned',transit:'On the way',delivered:'Delivered'}[o.status]||o.status):'No recent order';}
+  if(u.st==='near')return 'Nearest exchange points:\n- Retail Outlet 1\n- Swap-and-Go Station 2\n(sample sites)';
+  return '';}
+A.ussd=k=>{let u=S.ussd;const sz={1:'C6',2:'C13',3:'C50'};
+  if(!u||u.st==='done'||u.st==='track'||u.st==='near'){if(k==='dial'){S.ussd={st:'menu'};}return;}
+  if(u.st==='menu'){if(k==='1')u.st='size';else if(k==='2')u.st='track';else if(k==='3')u.st='near';}
+  else if(u.st==='size'&&sz[k]){u.sku=sz[k];u.st='qty';}
+  else if(u.st==='qty'&&+k>=1&&+k<=5){u.q=+k;u.st='pay';}
+  else if(u.st==='pay'&&(k==='1'||k==='2')){u.pay=k;u.id=nextNo('ORD');u.st='done';const items=[{sku:u.sku,q:u.q}];
+    S.orders.unshift({id:u.id,ch:'USSD',cust:'K. Odhiambo (sample)',addr:'Zone 7 (sample)',items,site:'SWP2',status:'queued',ts:Date.now(),pay:k==='1'?'Mobile money (mock) · paid':'Pay on delivery'});
+    S.channels7.USSD+=u.q;toast('USSD order '+u.id+' is in the Dispatch queue');}
+};
+
+/* ---------- actions: dispatch ---------- */
+function tripLoadKg(items){return items.reduce((a,i)=>a+(CYLS.includes(i.sku)?i.q:i.q),0);}
+function fitTrucks(items){const sku=items[0].sku;const n=items.reduce((a,i)=>a+i.q,0);
+  return S.fleet.filter(t=>t.status==='available'&&(sku==='LPGB'?t.type==='lpg':SKU[sku].cat==='fuel'?t.type==='fuel':(t.type==='cyl'||t.type==='bike'))&&n<=t.cap);}
+A.tripNew=(kind,ref,truckId)=>{const t=S.fleet.find(x=>x.id===truckId);if(!t)return toast('Pick a vehicle',1);
+  let src,items,to,dn;if(kind==='bulk'){const l=S.lpos.find(x=>x.id===ref);src=l.from;items=l.items;to=client(l.cl).n+' ('+client(l.cl).city+')';dn=l.dn;l.status='dispatched';}
+  else{const o=S.orders.find(x=>x.id===ref);src=o.site;items=o.items;to=o.cust+' · '+o.addr;dn=o.rc||o.id;o.status='assigned';}
+  const id=nextNo('TRP');S.trips.unshift({id,kind,ref,dn,truck:t.id,driver:t.driver,from:src,to,items,status:'planned'});t.status='on trip';toast(id+' planned: '+t.id+' · '+t.driver);};
+A.tripAdv=id=>{const tr=S.trips.find(x=>x.id===id);const t=S.fleet.find(x=>x.id===tr.truck);
+  if(tr.status==='planned'){if(tr.kind==='bulk'){for(const i of tr.items){if(S.stock[tr.from][i.sku]<i.q)return toast('Not enough stock at '+SITES[tr.from].s+' to load',1);}
+      tr.items.forEach(i=>{S.stock[tr.from][i.sku]-=i.q;if(CYLS.includes(i.sku))S.withCust[i.sku]+=i.q;S.moves.unshift({ts:Date.now(),from:tr.from,to:'CUSTOMER',sku:i.sku,q:i.q,ref:'Loaded · '+tr.dn+' · '+tr.truck});lowCheck(tr.from,i.sku);});}
+    tr.status='loading';tr.loadedAt=Date.now();toast('Loaded at '+SITES[tr.from].s+'. Gate pass '+tr.dn+'-GP');}
+  else if(tr.status==='loading'){tr.status='transit';tr.eta='about '+(20+Math.floor(Math.random()*50))+' min (sample)';const o=S.orders.find(x=>x.id===tr.ref);if(o)o.status='transit';toast(tr.id+' in transit');}
+  else if(tr.status==='transit'){openPOD(id);}};
+A.pod=(id,f)=>{const tr=S.trips.find(x=>x.id===id);const t=S.fleet.find(x=>x.id===tr.truck);let q=+f.qty;const i0=tr.items[0];if(i0.sku==='LPGB')q=Math.round(q*1000);else q=Math.round(q);
+  if(!f.by)return toast('Enter receiver name',1);tr.status='delivered';tr.pod={by:f.by,q,at:Date.now(),note:f.note||''};t.status='available';t.odo+=Math.floor(18+Math.random()*40);
+  if(q!==i0.q){const d=q-i0.q;alertAdd('red','Delivery',tr.id+' / '+tr.dn+': receiver signed for '+fq(i0.sku,q)+' vs '+fq(i0.sku,i0.q)+' on the delivery note ('+(d>0?'+':'')+fq(i0.sku,d)+'). Check meter ticket / driver.');}
+  const l=S.lpos.find(x=>x.id===tr.ref);if(l){l.status='delivered';l.pod=tr.pod;}const o=S.orders.find(x=>x.id===tr.ref);if(o)o.status='delivered';
+  if(t.svc-t.odo<500)alertAdd('amber','Fleet',t.id+' ('+t.plate+') service due in '+num(t.svc-t.odo)+' km.');
+  closeModal();toast('Delivered. Proof of delivery attached to '+tr.dn);};
+
+/* ---------- printable sample documents ---------- */
+const SELLER='Sample Energy Co. Ltd';
+function docShell(title,no,body){return '<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+title+' '+no+'</title><style>body{font-family:Inter,Segoe UI,Arial,sans-serif;color:#0a1628;margin:28px;font-size:13px}h1{font-size:20px;margin:0;color:#0a1628}.hd{display:flex;justify-content:space-between;border-bottom:3px solid #14b8a6;padding-bottom:10px;margin-bottom:14px}.wm{font-weight:800;font-size:18px}.wm b{color:#0d9488}table{width:100%;border-collapse:collapse;margin:12px 0}th,td{border-bottom:1px solid #dbe3ee;padding:7px;text-align:left}th{background:#f1f5f9;font-size:11px;text-transform:uppercase}td.n,th.n{text-align:right}.muted{color:#5b6b82}.stamp{display:inline-block;border:2px solid #b45309;color:#b45309;padding:3px 10px;font-weight:800;transform:rotate(-3deg);margin-top:8px}.box{border:1px solid #dbe3ee;border-radius:6px;padding:8px 10px}.g{display:grid;grid-template-columns:1fr 1fr;gap:12px}.sig{margin-top:30px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}.sig div{border-top:1px solid #0a1628;padding-top:4px;font-size:11px;color:#5b6b82}.tot{font-size:15px;font-weight:800}</style></head><body><div class="hd"><div><div class="wm">'+SELLER+'</div><div class="muted">Powered by Nota<b>54</b> · demo workspace</div></div><div style="text-align:right"><h1>'+title+'</h1><div><b>'+no+'</b></div><div class="muted">'+dstr(new Date())+'</div></div></div>'+body+'<p class="stamp">SAMPLE DOCUMENT · NOT VALID FOR TAX OR TRADE</p><p class="muted" style="font-size:11px">Generated by Nota54 demo. Prices are sample and tax-inclusive; the tax/levy breakdown is configured per company and jurisdiction at onboarding.</p></body></html>';}
+function itemsTable(items,priced){return '<table><tr><th>Product</th><th class="n">Quantity</th>'+(priced?'<th class="n">Unit price</th><th class="n">Amount</th>':'')+'</tr>'+items.map(i=>'<tr><td>'+SKU[i.sku].n+'</td><td class="n">'+fq(i.sku,i.q)+'</td>'+(priced?'<td class="n">'+money(SKU[i.sku].p)+(SKU[i.sku].u==='cyl'?'':' / '+SKU[i.sku].u)+'</td><td class="n">'+money(i.q*SKU[i.sku].p)+'</td>':'')+'</tr>').join('')+(priced?'<tr><td colspan="3" class="n tot">Total</td><td class="n tot">'+money(lineAmt(items))+'</td></tr>':'')+'</table>';}
+function docHTML(type,id){
+  if(type==='bol'){const b=S.bols.find(x=>x.id===id);return docShell('BOL reconciliation',id,'<div class="g"><div class="box"><b>Vessel</b><br>'+esc(b.vessel)+'<br>'+esc(b.port)+'</div><div class="box"><b>Product</b><br>'+SKU[b.sku].n+'<br>Receiving site: '+SITES.TRM.n+'</div></div><table><tr><th>Line</th><th class="n">Quantity</th></tr><tr><td>Bill of Lading quantity</td><td class="n">'+fq(b.sku,b.blq)+'</td></tr><tr><td>Terminal receipt (shore tank, corrected)</td><td class="n">'+(b.rcv!=null?fq(b.sku,b.rcv):'pending')+'</td></tr><tr><td><b>Variance</b></td><td class="n"><b>'+(b.var!=null?fq(b.sku,b.var)+' ('+num(b.varPct,2)+'%)':'—')+'</b></td></tr><tr><td>Tolerance</td><td class="n">±'+TOL[SKU[b.sku].cat==='fuel'?'fuel':'lpg']+'%</td></tr><tr><td>Result</td><td class="n">'+esc(b.status.toUpperCase())+' · '+esc(b.note||'')+'</td></tr></table><div class="sig"><div>Terminal supervisor</div><div>Inspector / surveyor</div><div>Finance</div></div>');}
+  const l=S.lpos.find(x=>x.id===id)||{};const c=client(l.cl)||{};
+  const party='<div class="g"><div class="box"><b>Customer</b><br>'+esc(c.n)+' (sample)<br>'+esc(c.city)+'<br>Terms: '+esc(c.terms)+'</div><div class="box"><b>Reference</b><br>Customer LPO: '+esc(l.id)+'<br>'+(l.pf?'Proforma: '+l.pf+'<br>':'')+(l.inv?'Invoice: '+l.inv+'<br>':'')+'Supply from: '+(SITES[l.from]||{}).n+'</div></div>';
+  if(type==='pf')return docShell('Proforma invoice',l.pf,party+itemsTable(l.items,true)+'<p>'+(c.terms==='Prepayment'?'<b>Payment required before loading.</b> Pay by bank transfer or mobile money quoting '+l.pf+'.':'Issued against LPO '+l.id+'. Converts to a tax invoice and delivery note on LPO approval.')+' Valid 7 days.</p>');
+  if(type==='inv')return docShell('Tax invoice',l.inv,party+itemsTable(l.items,true)+'<p>Settlement: '+esc(l.paid||'')+'</p>');
+  if(type==='dn'){const tr=S.trips.find(t=>t.dn===l.dn);return docShell('Delivery note',l.dn,party+itemsTable(l.items,false)+'<div class="g"><div class="box"><b>Transport</b><br>'+(tr?(tr.truck+' · '+esc((S.fleet.find(f=>f.id===tr.truck)||{}).plate)+'<br>'+esc(tr.driver)):'Not yet assigned')+'</div><div class="box"><b>Proof of delivery</b><br>'+(l.pod?'Received by '+esc(l.pod.by)+'<br>Qty received: '+fq(l.items[0].sku,l.pod.q)+'<br>'+new Date(l.pod.at).toLocaleString('en-GB'):'Pending')+'</div></div><div class="sig"><div>Dispatched by</div><div>Driver</div><div>Received by (name, signature, stamp)</div></div>');}
+  return '';}
+function showDoc(type,id){const h=docHTML(type,id);const t={pf:'Proforma invoice',inv:'Tax invoice',dn:'Delivery note',bol:'BOL reconciliation'}[type];
+  openModal(t+' · sample','<iframe id="docf"></iframe>','<button class="btn sm pri" data-act="print">Print / save PDF</button> ');$('#docf').srcdoc=h;}
+function openModal(t,b,acts){$('#mTitle').textContent=t;$('#mBody').innerHTML=b;$('#mActs').innerHTML=acts||'';$('#modal').classList.add('on');}
+function closeModal(){$('#modal').classList.remove('on');}
+function openPOD(id){const tr=S.trips.find(x=>x.id===id);const i0=tr.items[0];const v=i0.sku==='LPGB'?i0.q/1000:i0.q;
+  openModal('Proof of delivery · '+tr.id,'<div data-f="pod" data-id="'+id+'" class="grid" style="gap:10px"><div class="muted small">Captured on the driver\'s phone in the live product (signature + photo). Here it is a mock form.</div><div class="row"><label class="f">Receiver name<input name="by" value="Store keeper (sample)"></label><label class="f">Quantity received ('+(i0.sku==='LPGB'?'MT':SKU[i0.sku].u)+')<input name="qty" type="number" step="any" value="'+v+'"></label><label class="f">Note<input name="note" placeholder="optional"></label></div><div class="tile small">✍ Signature captured (mock) &nbsp; · &nbsp; 📷 Photo of meter ticket (mock) &nbsp; · &nbsp; 📍 GPS stamp (mock)</div><div><button class="btn pri" data-act="pod">Confirm delivery</button> <span class="muted tiny">Tip: change the quantity to show a short-delivery alert.</span></div></div>');}
+
+/* ---------- UI pieces ---------- */
+const kpi=(l,v,s,cls)=>'<div class="card kpi '+(cls||'')+'"><div class="l">'+l+'</div><div class="v">'+v+'</div><div class="s">'+(s||'')+'</div></div>';
+const chip=(t,c)=>'<span class="chip '+(c||'')+'">'+t+'</span>';
+function pctBar(v,cap,ro){const p=cap?Math.max(0,Math.min(100,v/cap*100)):0;const cls=ro!=null&&v<ro?'low':p<35?'mid':'';return '<div class="bar"><i class="'+cls+'" style="width:'+p.toFixed(1)+'%"></i></div>';}
+function steps(list,cur,bad){const i=list.indexOf(cur);return '<div class="steps">'+list.map((s,k)=>'<span class="'+(bad&&k===i?'x':k<i?'d':k===i?'c':'')+'">'+s+'</span>').join('')+'</div>';}
+const LPO_ST=['received','checked','proforma','invoiced','dispatched','delivered'];
+const LPO_LB={received:'LPO received',checked:'Credit OK',proforma:'Proforma',invoiced:'Tax invoice + DN',dispatched:'Dispatched',delivered:'Delivered (POD)',blocked:'Blocked'};
+function lpoSteps(l){const cur=l.status==='blocked'?'checked':l.status;return '<div class="steps">'+LPO_ST.map((s,k)=>{const i=LPO_ST.indexOf(cur);let c=k<i?'d':k===i?'c':'';if(l.status==='blocked'&&s==='checked')c='x';return '<span class="'+c+'">'+(l.status==='blocked'&&s==='checked'?'Credit blocked':LPO_LB[s])+'</span>';}).join('')+'</div>';}
+function openAlerts(){return S.alerts.filter(a=>a.open);}
+function alertList(max){const a=S.alerts.slice(0,max||50);if(!a.length)return '<div class="muted small">No alerts.</div>';
+  return a.map(x=>'<div class="alert '+(x.lvl==='amber'?'amber':'')+(x.open?'':' done')+'">'+chip(x.area,x.lvl==='amber'?'amber':'red')+'<div class="sp">'+esc(mtxt(x.txt))+'<div class="muted tiny">'+tstr(x.ts)+'</div></div>'+(x.open?'<button class="btn sm" data-act="ack" data-id="'+x.id+'">Acknowledge</button>':chip('Closed','grey'))+'</div>').join('');}
+function skuOpts(list,sel){return (list||SKUS).map(k=>'<option value="'+k+'"'+(k===sel?' selected':'')+'>'+SKU[k].n+(k==='LPGB'?' (MT)':'')+'</option>').join('');}
+function siteOpts(list,sel){return (list||SITEIDS).map(k=>'<option value="'+k+'"'+(k===sel?' selected':'')+'>'+SITES[k].n+'</option>').join('');}
+
+/* ---------- render: dashboard ---------- */
+let UI={tab:'dash',trend:'C13',bolSku:'LPGB'};
+function trendSVG(sku){const W=640,H=190,P=34;const v=S.hist.map(d=>d[sku]);const max=Math.max(...v)*1.12;const bw=(W-P-8)/14;
+  let g='<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="14-day trend">';
+  for(let k=0;k<=4;k++){const y=10+(H-40)*k/4;g+='<line x1="'+P+'" x2="'+W+'" y1="'+y+'" y2="'+y+'" stroke="rgba(147,164,191,.15)"/><text x="'+(P-4)+'" y="'+(y+3)+'" text-anchor="end">'+(SKU[sku].u==='kg'?num(max*(1-k/4)/1000,1):num(max*(1-k/4)/(max>20000?1000:1),0)+(max>20000?'k':''))+'</text>';}
+  v.forEach((x,i)=>{const h=(H-40)*x/max,X=P+4+i*bw,Y=10+(H-40)-h;g+='<rect x="'+X+'" y="'+Y+'" width="'+(bw-6)+'" height="'+h+'" rx="3" fill="'+SKU[sku].col+'" opacity="'+(i===13?1:.7)+'"><title>'+dayLabel(i)+': '+fq(sku,x)+'</title></rect>';
+    if(i%2===1||i===13)g+='<text x="'+(X+(bw-6)/2)+'" y="'+(H-14)+'" text-anchor="middle">'+(i===13?'Today':dayLabel(i))+'</text>';});
+  return g+'</svg><div class="muted tiny">'+SKU[sku].n+(SKU[sku].u==='kg'?' (MT)':SKU[sku].u==='L'?' (litres)':' (cylinders)')+' · “Today” is so far today</div>';}
+function rDash(){const t=S.hist[13];const val=SKUS.reduce((a,k)=>a+t[k]*SKU[k].p,0);
+  const lpgKg=t.LPGB+CYLS.reduce((a,k)=>a+t[k]*SKU[k].kg,0);const cyl=CYLS.reduce((a,k)=>a+t[k],0);
+  const pend=S.lpos.filter(l=>['received','checked','proforma','blocked'].includes(l.status));const pv=pend.reduce((a,l)=>a+lineAmt(l.items),0);
+  const oa=openAlerts();
+  let h='<div class="row" style="justify-content:space-between;margin-bottom:10px"><div><h2>Executive dashboard</h2><p class="lead" style="margin:0">One view across import terminal, bottling plant and retail outlets. Every figure updates as the team works in the other tabs.</p></div></div>';
+  h+='<div class="grid g6" style="margin-bottom:14px">'+kpi('Sales today',money0(val),'all products, so far','hl')+kpi('Fuel sold today',num(t.PMS+t.AGO)+' L','PMS '+num(t.PMS)+' · AGO '+num(t.AGO))+kpi('LPG sold today',num(lpgKg/1000,2)+' MT','bulk + cylinders')+kpi('Cylinders out today',num(cyl),'6 kg '+t.C6+' · 13 kg '+t.C13+' · 50 kg '+t.C50)+kpi('Pending LPOs / proformas',pend.length,money0(pv)+' in the pipeline')+kpi('Open alerts',oa.length,'variance · credit · stock',oa.length?'warn':'')+'</div>';
+  // sales by product today
+  const avg={};SKUS.forEach(k=>{let s=0;for(let i=0;i<13;i++)s+=S.hist[i][k];avg[k]=s/13;});
+  h+='<div class="grid g2" style="margin-bottom:14px"><div class="card"><h3>Daily sales volume by product</h3><table class="t"><tr><th>Product</th><th class="n">Today so far</th><th class="n">13-day daily avg</th><th>vs avg</th><th class="n">Value today</th></tr>'+
+    SKUS.map(k=>'<tr><td><span style="display:inline-block;width:9px;height:9px;border-radius:3px;background:'+SKU[k].col+';margin-right:6px"></span>'+SKU[k].n+'</td><td class="n">'+fq(k,t[k])+'</td><td class="n muted">'+fq(k,Math.round(avg[k]))+'</td><td style="min-width:90px">'+pctBar(t[k],avg[k]*1.2)+'</td><td class="n">'+money0(t[k]*SKU[k].p)+'</td></tr>').join('')+'</table></div>';
+  h+='<div class="card"><div class="row" style="justify-content:space-between"><h3 style="margin:0">Sales trend · last 14 days</h3><select data-ui="trend">'+skuOpts(SKUS,UI.trend)+'</select></div>'+trendSVG(UI.trend)+'</div></div>';
+  // stock per site
+  h+='<div class="grid g21" style="margin-bottom:14px"><div class="card"><h3>Stock per site (live)</h3><table class="t"><tr><th>Site</th>'+SKUS.map(k=>'<th class="n">'+SKU[k].n.replace('LPG cylinder ','Cyl ').replace(' · Petrol','').replace(' · Diesel','')+'</th>').join('')+'</tr>'+
+    SITEIDS.map(s=>'<tr><td><b>'+SITES[s].n+'</b><div class="muted tiny">'+SITES[s].t+'</div></td>'+SKUS.map(k=>{const c=(S.cap[s]||{})[k];if(c==null)return '<td class="n muted">—</td>';return '<td class="n">'+fq(k,S.stock[s][k])+pctBar(S.stock[s][k],c,(S.reorder[s]||{})[k])+'</td>';}).join('')+'</tr>').join('')+'</table><div class="muted tiny">Bar = % of site capacity · red = below reorder level</div></div>';
+  h+='<div class="card"><h3>Pending LPOs &amp; proformas</h3>'+(pend.length?'<table class="t">'+pend.map(l=>'<tr><td><span class="code">'+l.id+'</span><div class="small">'+esc(client(l.cl).n)+'</div><div class="muted tiny">'+itemsTxt(l.items)+'</div></td><td class="n">'+money0(lineAmt(l.items))+'<div>'+chip(LPO_LB[l.status],l.status==='blocked'?'red':l.status==='proforma'?'amber':'blue')+'</div></td></tr>').join('')+'</table>':'<div class="muted small">Nothing pending.</div>')+'<button class="btn sm" data-tab-go="docs" style="margin-top:8px">Open document trail →</button></div></div>';
+  // purchase trends
+  const cl=[...S.clients].sort((a,b)=>b.v30-a.v30);const mx=cl[0].v30;
+  const chs=S.channels7;const ct=Object.values(chs).reduce((a,b)=>a+b,0);const chCol=['#14b8a6','#60a5fa','#f59e0b','#a78bfa'];
+  h+='<div class="grid g3"><div class="card"><h3>B2B purchase trends · last 30 days</h3><table class="t">'+cl.map(c=>{const ch=(c.v30-c.v30p)/c.v30p*100;return '<tr><td>'+esc(c.n)+'<div class="muted tiny">'+c.seg+' · mostly '+SKU[c.main].n+'</div>'+pctBar(c.v30,mx)+'</td><td class="n">'+money0(c.v30)+'<div class="tiny" style="color:'+(ch>=0?'#86efac':'#fca5a5')+'">'+(ch>=0?'▲ ':'▼ ')+num(Math.abs(ch),1)+'% vs prior 30d</div></td></tr>';}).join('')+'</table></div>';
+  h+='<div class="card"><h3>Retail cylinder sales by channel · 7 days</h3>'+Object.keys(chs).map((k,i)=>'<div style="margin:8px 0"><div class="row" style="justify-content:space-between"><span>'+k+'</span><b>'+num(chs[k])+' <span class="muted tiny">('+num(chs[k]/ct*100,0)+'%)</span></b></div><div class="bar" style="height:9px"><i style="width:'+(chs[k]/ct*100)+'%;background:'+chCol[i]+'"></i></div></div>').join('')+'<div class="muted tiny" style="margin-top:10px">Cylinder turnaround (est.): '+CYLS.map(k=>SKU[k].kg+' kg '+num(turnDays(k),1)+' d').join(' · ')+'</div></div>';
+  h+='<div class="card"><h3>Variance &amp; risk alerts</h3>'+alertList(6)+'</div></div>';
+  $('#s-dash').innerHTML=h;}
+function dailyOut(k){let s=0;for(let i=7;i<14;i++)s+=S.hist[i][k];return s/7;}
+function turnDays(k){return S.withCust[k]/Math.max(1,dailyOut(k))/1;}
+
+/* ---------- render: document trail ---------- */
+function rDocs(){let h='<h2>Document trail</h2><p class="lead">Import: every Bill of Lading is matched against what the terminal actually received and the difference is reconciled. Sales: every B2B LPO flows to proforma, tax invoice and delivery note, with credit control in between. Click any document number to open a printable sample.</p>';
+  h+='<div class="card" style="margin-bottom:14px"><div class="row" style="justify-content:space-between"><h3 style="margin:0">1 · Import: BOL → terminal receipt → variance reconciliation</h3>'+
+   '<div class="row" data-f="bol"><input name="vessel" placeholder="Vessel name" value="MT Sample Voyager" style="width:160px"><select name="sku">'+skuOpts(['LPGB','PMS','AGO'],'LPGB')+'</select><input name="qty" type="number" step="any" placeholder="BOL qty" value="900" title="MT for LPG, litres for fuel"><button class="btn" data-act="bolNew">+ Log BOL</button></div></div>'+
+   '<table class="t" style="margin-top:10px"><tr><th>BOL</th><th>Vessel / product</th><th class="n">BOL qty</th><th class="n">Terminal receipt</th><th class="n">Variance</th><th>Status</th><th></th></tr>'+
+   S.bols.map(b=>{const tol=TOL[SKU[b.sku].cat==='fuel'?'fuel':'lpg'];const st=b.status==='logged'?'Logged':b.status==='received'?'Terminal receipt':b.status==='variance'?'Terminal receipt':'Reconciled';
+     let act='';if(b.status==='logged')act='<div class="row"><input type="number" step="any" id="rcv-'+b.id+'" placeholder="'+(b.sku==='LPGB'?'MT':'litres')+' received" value="'+(b.sku==='LPGB'?(b.blq/1000*0.9962).toFixed(1):Math.round(b.blq*0.9958))+'"><button class="btn sm" data-act="bolRcv" data-id="'+b.id+'">Record receipt</button></div>';
+     else if(b.status==='received')act='<button class="btn sm pri" data-act="bolRecon" data-id="'+b.id+'">Reconcile</button>';
+     else if(b.status==='variance')act='<button class="btn sm warn" data-act="bolClose" data-id="'+b.id+'">Log claim &amp; close</button>';
+     return '<tr><td><a href="#" class="code" data-act="doc" data-t="bol" data-id="'+b.id+'">'+b.id+'</a><div class="muted tiny">'+dstr(new Date(b.ts))+'</div></td><td>'+esc(b.vessel)+'<div class="muted tiny">'+SKU[b.sku].n+' · '+esc(b.port)+'</div></td><td class="n">'+fq(b.sku,b.blq)+'</td><td class="n">'+(b.rcv!=null?fq(b.sku,b.rcv):'<span class="muted">'+(b.eta==='discharging'?'discharging…':'—')+'</span>')+'</td><td class="n">'+(b.var!=null?'<b style="color:'+(Math.abs(b.varPct)>tol?'#fca5a5':'#86efac')+'">'+fq(b.sku,b.var)+'<br>'+num(b.varPct,2)+'%</b>':b.rcv!=null&&b.status!=='reconciled'?'<span class="muted">'+num((b.rcv-b.blq)/b.blq*100,2)+'% (unreconciled)</span>':b.status==='reconciled'&&b.rcv!=null?num((b.rcv-b.blq)/b.blq*100,2)+'%':'—')+'</td><td>'+steps(['Logged','Terminal receipt','Reconciled'],st,b.status==='variance')+'<div class="muted tiny" style="margin-top:3px">'+esc(b.note||('tolerance ±'+tol+'%'))+'</div></td><td>'+act+'</td></tr>';}).join('')+'</table></div>';
+  h+='<div class="card"><div class="row" style="justify-content:space-between"><h3 style="margin:0">2 · B2B sales: LPO → credit check → proforma → tax invoice + delivery note → dispatch → proof of delivery</h3>'+
+   '<div class="row" data-f="lpo"><select name="cl">'+S.clients.map(c=>'<option value="'+c.id+'">'+esc(c.n)+'</option>').join('')+'</select><select name="sku">'+skuOpts(SKUS,'C50')+'</select><input name="qty" type="number" step="any" value="10" title="MT for LPG bulk, litres for fuel, units for cylinders"><button class="btn" data-act="lpoNew">+ Receive LPO</button></div></div>'+
+   '<table class="t" style="margin-top:10px"><tr><th>LPO / customer</th><th>Items</th><th class="n">Value</th><th>Progress &amp; documents</th><th>Next step</th></tr>'+
+   S.lpos.map(l=>{const c=client(l.cl);let a='';
+     if(l.status==='received')a='<button class="btn sm" data-act="lpoCheck" data-id="'+l.id+'">Run credit check</button>';
+     else if(l.status==='blocked')a='<button class="btn sm warn" data-act="lpoOverride" data-id="'+l.id+'">Manager override…</button>';
+     else if(l.status==='checked')a='<button class="btn sm pri" data-act="lpoPf" data-id="'+l.id+'">Generate proforma</button>';
+     else if(l.status==='proforma')a=c.terms==='Prepayment'?'<button class="btn sm pri" data-act="lpoPay" data-id="'+l.id+'">Payment received → invoice + DN</button>':'<button class="btn sm pri" data-act="lpoAppr" data-id="'+l.id+'">LPO approved → invoice + DN</button>';
+     else if(l.status==='invoiced')a='<button class="btn sm" data-tab-go="disp">Assign truck in Dispatch →</button>';
+     else if(l.status==='dispatched')a='<span class="muted small">On the road</span>';else a=chip('Complete','ok');
+     const cc=creditCheck(l);
+     const docs=[l.pf&&'<a href="#" class="code" data-act="doc" data-t="pf" data-id="'+l.id+'">'+l.pf+'</a>',l.inv&&'<a href="#" class="code" data-act="doc" data-t="inv" data-id="'+l.id+'">'+l.inv+'</a>',l.dn&&'<a href="#" class="code" data-act="doc" data-t="dn" data-id="'+l.id+'">'+l.dn+'</a>'].filter(Boolean).join(' · ');
+     return '<tr><td><span class="code">'+l.id+'</span><div><b>'+esc(c.n)+'</b></div><div class="muted tiny">'+c.seg+' · '+c.terms+(c.terms!=='Prepayment'?' · limit '+money0(c.limit):'')+'</div></td><td class="small">'+itemsTxt(l.items)+'<div class="muted tiny">from '+SITES[l.from].s+'</div></td><td class="n">'+money0(lineAmt(l.items))+'</td><td>'+lpoSteps(l)+'<div class="tiny" style="margin-top:4px">'+(docs||'<span class="muted">No documents yet</span>')+'</div>'+(l.status==='blocked'?'<div class="tiny" style="color:#fca5a5;margin-top:3px">Exposure '+money0(exposure(c))+' + '+money0(lineAmt(l.items))+' > limit '+money0(c.limit)+'</div>':'')+(l.override?'<div class="tiny muted">Override: '+esc(l.override)+'</div>':'')+(l.pod?'<div class="tiny" style="color:#86efac">POD: '+esc(l.pod.by)+' · '+fq(l.items[0].sku,l.pod.q)+'</div>':'')+'</td><td>'+a+'</td></tr>';}).join('')+'</table></div>';
+  $('#s-docs').innerHTML=h;}
+
+/* ---------- render: inventory & sites ---------- */
+function rInv(){let h='<h2>Inventory &amp; multi-site operations</h2><p class="lead">Product SKUs: PMS (petrol), AGO (diesel), LPG bulk (tonnes) and LPG cylinders 6 / 13 / 50 kg. Stock moves Import Depot → Bottling Plant → Retail Outlet / Swap-and-Go point, and empties come back for refilling.</p>';
+  h+='<div class="grid g4" style="margin-bottom:14px">'+SITEIDS.map(s=>'<div class="card"><h3 style="margin-bottom:2px">'+SITES[s].n+'</h3><div class="muted tiny" style="margin-bottom:8px">'+SITES[s].t+'</div>'+SKUS.filter(k=>(S.cap[s]||{})[k]!=null).map(k=>'<div style="margin-bottom:7px"><div class="row" style="justify-content:space-between"><span class="small">'+SKU[k].n+'</span><b class="small">'+fq(k,S.stock[s][k])+'</b></div>'+pctBar(S.stock[s][k],S.cap[s][k],S.reorder[s][k])+'</div>').join('')+(S.empties[s]?'<div class="muted tiny" style="margin-top:6px">Empties on site: '+CYLS.map(k=>SKU[k].kg+' kg '+S.empties[s][k]).join(' · ')+'</div>':'')+'</div>').join('')+'</div>';
+  h+='<div class="grid g4" style="margin-bottom:14px">'+
+   '<div class="card" data-f="trf"><h3>Move stock between sites</h3><div class="grid" style="gap:7px"><label class="f">From<select name="from">'+siteOpts(SITEIDS,'TRM')+'</select></label><label class="f">To<select name="to">'+siteOpts(SITEIDS,'PLT')+'</select></label><label class="f">Product<select name="sku">'+skuOpts(SKUS,'LPGB')+'</select></label><label class="f">Quantity (MT for LPG bulk)<input name="qty" type="number" step="any" value="18"></label><button class="btn pri" data-act="trf">Move stock</button></div></div>'+
+   '<div class="card" data-f="fill"><h3>Bottling plant · filling batch</h3><div class="grid" style="gap:7px"><label class="f">Cylinder size<select name="sku">'+skuOpts(CYLS,'C13')+'</select></label><label class="f">Cylinders to fill<input name="qty" type="number" value="200"></label><div class="muted tiny">Uses empties + bulk LPG at the plant (size × cylinders).</div><button class="btn pri" data-act="fill">Run filling batch</button></div></div>'+
+   '<div class="card" data-f="emp"><h3>Return empties to plant</h3><div class="grid" style="gap:7px"><label class="f">From<select name="from">'+siteOpts(['OUT1','SWP2'],'SWP2')+'</select></label><label class="f">Cylinder size<select name="sku">'+skuOpts(CYLS,'C13')+'</select></label><label class="f">Empties<input name="qty" type="number" value="40"></label><button class="btn pri" data-act="emp">Return empties</button></div></div>'+
+   '<div class="card" data-f="cnt"><h3>Physical count / tank dip</h3><div class="grid" style="gap:7px"><label class="f">Site<select name="site">'+siteOpts(SITEIDS,'OUT1')+'</select></label><label class="f">Product<select name="sku">'+skuOpts(SKUS,'PMS')+'</select></label><label class="f">Counted (MT for LPG bulk)<input name="qty" type="number" step="any" value="'+(S.stock.OUT1.PMS-410)+'"></label><button class="btn warn" data-act="cnt">Post count → check variance</button></div></div></div>';
+  // recirculation
+  h+='<div class="grid g2"><div class="card"><h3>Cylinder recirculation &amp; turnaround</h3><table class="t"><tr><th>Size</th><th class="n">Filled · plant</th><th class="n">Filled · outlets</th><th class="n">With customers</th><th class="n">Empties · outlets</th><th class="n">Empties · plant</th><th class="n">Fleet total</th><th class="n">Turnaround</th></tr>'+
+   CYLS.map(k=>{const fo=S.stock.OUT1[k]+S.stock.SWP2[k],eo=S.empties.OUT1[k]+S.empties.SWP2[k];const tot=S.stock.PLT[k]+fo+S.withCust[k]+eo+S.empties.PLT[k];return '<tr><td><b>'+SKU[k].kg+' kg</b></td><td class="n">'+num(S.stock.PLT[k])+'</td><td class="n">'+num(fo)+'</td><td class="n">'+num(S.withCust[k])+'</td><td class="n">'+num(eo)+'</td><td class="n">'+num(S.empties.PLT[k])+'</td><td class="n"><b>'+num(tot)+'</b></td><td class="n">'+num(turnDays(k),1)+' d</td></tr>';}).join('')+
+   '</table><div class="muted tiny">Turnaround (est.) = cylinders with customers ÷ average cylinders sold per day (last 7 days). Fleet total lets you spot missing cylinders between counts.</div></div>';
+  h+='<div class="card"><h3>Stock movement log</h3><table class="t">'+S.moves.slice(0,12).map(m=>'<tr><td class="muted tiny" style="white-space:nowrap">'+tstr(m.ts)+'</td><td class="small">'+(SITES[m.from]?SITES[m.from].s:m.from==='IMPORT'?'Import (BOL)':m.from)+' → '+(SITES[m.to]?SITES[m.to].s:m.to==='CUSTOMER'?'Customer':m.to)+'<div class="muted tiny">'+esc(m.ref)+'</div></td><td class="n small">'+(m.empty?'empty ':'')+fq(m.sku,m.q)+'<div class="muted tiny">'+SKU[m.sku].n+'</div></td></tr>').join('')+'</table></div></div>';
+  h+='<div class="card" style="margin-top:14px"><h3>Loss / variance alerts across sites</h3>'+alertList(20)+'</div>';
+  $('#s-inv').innerHTML=h;}
+
+/* ---------- render: clients & sales ---------- */
+function rCli(){let h='<h2>Clients &amp; sales channels</h2><p class="lead">Commercial / bulk accounts buy on LPO with credit limits enforced automatically. Household customers buy fast at the counter, by home delivery, or by USSD / app.</p>';
+  h+='<div class="card" style="margin-bottom:14px"><h3>Commercial &amp; bulk clients (B2B) · credit control</h3><table class="t"><tr><th>Client</th><th>Segment</th><th>Terms</th><th class="n">Credit limit</th><th class="n">Outstanding</th><th class="n">Open proformas</th><th class="n">Available</th><th>Utilisation</th><th>Status</th></tr>'+
+   S.clients.map(c=>{const ex=exposure(c);const op=ex-c.out;const av=c.limit-ex;const u=c.limit?ex/c.limit:0;const bl=S.lpos.some(l=>l.cl===c.id&&l.status==='blocked');
+    return '<tr><td><b>'+esc(c.n)+'</b><div class="muted tiny">'+esc(c.city)+'</div></td><td>'+c.seg+'</td><td class="small">'+c.terms+'</td><td class="n">'+(c.limit?money0(c.limit):'—')+'</td><td class="n">'+money0(c.out)+'</td><td class="n">'+money0(op)+'</td><td class="n">'+(c.limit?money0(av):'prepay')+'</td><td style="min-width:110px">'+(c.limit?'<div class="bar"><i class="'+(u>0.9?'low':u>0.75?'mid':'')+'" style="width:'+Math.min(100,u*100)+'%"></i></div><span class="tiny muted">'+num(u*100,0)+'%</span>':'<span class="tiny muted">cash before loading</span>')+'</td><td>'+(bl?chip('LPO blocked','red'):u>1?chip('Over limit (override)','red'):u>0.9?chip('Near limit','amber'):chip('OK','ok'))+'</td></tr>';}).join('')+'</table><div class="muted tiny">Credit limit check = outstanding invoices + open proformas + new LPO. Over-limit LPOs are blocked until a manager override (logged).</div></div>';
+  // POS
+  const cartH=S.cart.length?S.cart.map((i,ix)=>'<div class="row" style="justify-content:space-between;margin:4px 0"><span class="small">'+i.q+' × '+SKU[i.sku].kg+' kg '+(i.mode==='swap'?'refill (exchange)':'new cylinder + deposit')+'</span><span class="small">'+money(i.q*(SKU[i.sku].p+(i.mode==='new'?DEPOSIT[i.sku]:0)))+' <button class="btn sm" data-act="cartRm" data-i="'+ix+'">×</button></span></div>').join('')+'<div class="row" style="justify-content:space-between;border-top:1px solid var(--line);padding-top:6px;margin-top:6px"><b>Total</b><b>'+money(cartTotal())+'</b></div>':'<div class="muted small">Tap a product to add it.</div>';
+  h+='<div class="grid g21" style="margin-bottom:14px"><div class="card" data-f="pos"><div class="row" style="justify-content:space-between"><h3 style="margin:0">Retail fast checkout (counter / exchange cage)</h3><select name="site">'+siteOpts(['OUT1','SWP2'],UI.posSite||'OUT1')+'</select></div>'+
+   '<div class="grid g3" style="margin:10px 0">'+CYLS.map(k=>'<div class="tile"><b>'+SKU[k].kg+' kg</b> <span class="muted tiny">in stock: '+S.stock[UI.posSite||'OUT1'][k]+'</span><div class="row" style="margin-top:6px"><button class="btn sm pri" data-act="cartAdd" data-sku="'+k+'" data-mode="swap">Refill (swap) '+money(SKU[k].p)+'</button><button class="btn sm" data-act="cartAdd" data-sku="'+k+'" data-mode="new">New + deposit</button></div></div>').join('')+'</div>'+
+   '<div class="grid g2"><div class="tile cart">'+cartH+'</div><div class="grid" style="gap:7px"><div class="row"><label class="f">Sale type<select name="mode"><option value="walkin">Walk-in (hand over now)</option><option value="delivery">Home delivery</option></select></label><label class="f">Payment<select name="pay"><option>Cash</option><option>Mobile money</option><option>Card</option></select></label></div><div class="row"><label class="f">Customer (optional)<input name="cust" placeholder="Name / phone"></label><label class="f">Delivery address<input name="addr" placeholder="for home delivery"></label></div><button class="btn pri" data-act="checkout">Checkout</button></div></div></div>';
+  h+='<div class="card"><h3>USSD order (mock)</h3><div class="phone"><div class="scr" id="ussdScr">'+esc(ussdScreen())+'</div><div class="keys">'+['1','2','3','4','5'].map(k=>'<button data-act="ussd" data-k="'+k+'">'+k+'</button>').join('')+'<button data-act="ussd" data-k="dial" style="background:#14b8a6;color:#03201c">Dial</button></div><div class="row" style="margin-top:8px;justify-content:center"><button class="btn sm" data-act="ussdEnd">End session</button></div></div><div class="muted tiny" style="margin-top:8px;text-align:center">Dial → 1 → size → qty → pay. The order appears in Dispatch. Demo code '+USSD_CODE+', no live USSD.</div></div></div>';
+  h+='<div class="card"><h3>Household / retail customers</h3><table class="t"><tr><th>Customer</th><th>Phone</th><th>Usual channel</th><th>Last purchase</th><th class="n">Orders</th></tr>'+S.retail.map(r=>'<tr><td>'+esc(r.n)+'</td><td class="code">'+esc(r.ph)+'</td><td>'+r.ch+'</td><td>'+SKU[r.last].n+'</td><td class="n">'+r.orders+'</td></tr>').join('')+'</table></div>';
+  $('#s-cli').innerHTML=h;}
+
+/* ---------- render: delivery & dispatch ---------- */
+const TR_ST=['planned','loading','transit','delivered'];const TR_LB={planned:'Planned',loading:'Loaded · gate pass',transit:'In transit',delivered:'Delivered · POD'};
+function rDisp(){let h='<h2>Delivery &amp; dispatch</h2><p class="lead">Part of distribution: bulk tanker trips and last-mile cylinder deliveries, each tied to a delivery note or order, with truck, driver, load, route, status and proof of delivery.</p>';
+  const ready=S.lpos.filter(l=>l.status==='invoiced').map(l=>({kind:'bulk',ref:l.id,dn:l.dn,who:client(l.cl).n,to:client(l.cl).city,items:l.items,from:l.from}))
+    .concat(S.orders.filter(o=>o.status==='queued').map(o=>({kind:'lastmile',ref:o.id,dn:o.id,who:o.cust+' · '+o.ch,to:o.addr,items:o.items,from:o.site,pay:o.pay})));
+  const onRoad=S.fleet.filter(f=>f.status==='on trip').length;
+  h+='<div class="grid g4" style="margin-bottom:14px">'+kpi('Ready to dispatch',ready.length,'invoiced LPOs + home orders',ready.length?'hl':'')+kpi('Trips in progress',S.trips.filter(t=>t.status!=='delivered').length,'planned · loading · in transit')+kpi('Delivered today',S.trips.filter(t=>t.status==='delivered'&&t.pod&&new Date(t.pod.at).toDateString()===new Date().toDateString()).length,'with proof of delivery')+kpi('Vehicles on the road',onRoad+' / '+S.fleet.length,'tankers · cylinder truck · tricycles')+'</div>';
+  h+='<div class="card" style="margin-bottom:14px"><h3>Dispatch queue</h3>'+(ready.length?'<table class="t"><tr><th>Delivery note / order</th><th>Customer &amp; destination</th><th>Load</th><th>From</th><th>Assign vehicle &amp; driver</th></tr>'+ready.map(r=>{const fits=fitTrucks(r.items);return '<tr><td><span class="code">'+r.dn+'</span><div>'+chip(r.kind==='bulk'?'Bulk B2B':'Last-mile','blue')+'</div></td><td>'+esc(r.who)+'<div class="muted tiny">'+esc(r.to)+(r.pay?' · '+esc(r.pay):'')+'</div></td><td class="small">'+itemsTxt(r.items)+'</td><td class="small">'+SITES[r.from].s+'</td><td>'+(fits.length?'<div class="row"><select id="trk-'+r.ref+'">'+fits.map(t=>'<option value="'+t.id+'">'+t.id+' · '+t.n+' · '+t.driver+'</option>').join('')+'</select><button class="btn sm pri" data-act="tripNew" data-kind="'+r.kind+'" data-ref="'+r.ref+'">Assign</button></div>':'<span class="chip amber">No suitable vehicle free</span>')+'</td></tr>';}).join('')+'</table>':'<div class="muted small">Queue is empty. Approve an LPO in Document trail or take a home-delivery / USSD order in Clients &amp; sales.</div>')+'</div>';
+  h+='<div class="card" style="margin-bottom:14px"><h3>Trips</h3><table class="t"><tr><th>Trip</th><th>Vehicle · driver</th><th>Route</th><th>Load</th><th>Status</th><th>Proof of delivery</th><th></th></tr>'+S.trips.map(t=>{const v=S.fleet.find(f=>f.id===t.truck);const nx={planned:'Load at '+SITES[t.from].s,loading:'Depart',transit:'Capture POD'}[t.status];
+    const dnLink=S.lpos.find(l=>l.dn===t.dn)?'<a href="#" class="code" data-act="doc" data-t="dn" data-id="'+t.ref+'">'+t.dn+'</a>':'<span class="code">'+t.dn+'</span>';
+    return '<tr><td><span class="code">'+t.id+'</span><div class="tiny">'+dnLink+'</div></td><td>'+t.truck+' · '+esc(v.n)+'<div class="muted tiny">'+esc(v.plate)+' · '+esc(t.driver)+'</div></td><td class="small">'+SITES[t.from].s+' → '+esc(t.to)+(t.status==='transit'?'<div class="tiny" style="color:var(--teal2)">ETA '+esc(t.eta)+'</div>':'')+'</td><td class="small">'+itemsTxt(t.items)+'</td><td>'+steps(TR_ST.map(s=>TR_LB[s]),TR_LB[t.status])+'</td><td class="small">'+(t.pod?'✓ '+esc(t.pod.by)+'<div class="muted tiny">'+fq(t.items[0].sku,t.pod.q)+' · '+tstr(t.pod.at)+'</div>':'<span class="muted">pending</span>')+'</td><td>'+(nx?'<button class="btn sm '+(t.status==='transit'?'pri':'')+'" data-act="tripAdv" data-id="'+t.id+'">'+nx+'</button>':'')+'</td></tr>';}).join('')+'</table></div>';
+  h+='<div class="card"><h3>Vehicles &amp; drivers (distribution fleet)</h3><table class="t"><tr><th>Vehicle</th><th>Type / capacity</th><th>Plate</th><th>Driver</th><th>Status</th><th class="n">Odometer</th><th>Next service</th></tr>'+S.fleet.map(f=>{const left=f.svc-f.odo;return '<tr><td><b>'+f.id+'</b></td><td>'+esc(f.n)+'</td><td class="code">'+esc(f.plate)+'</td><td>'+esc(f.driver)+'</td><td>'+chip(f.status,f.status==='available'?'ok':'blue')+'</td><td class="n">'+num(f.odo)+' km</td><td>'+(left<1000?chip('due in '+num(left)+' km','amber'):'<span class="muted small">in '+num(left)+' km</span>')+'</td></tr>';}).join('')+'</table><div class="muted tiny">Vehicle compatibility is checked on assignment: LPG bulk → LPG tanker, PMS/AGO → fuel tanker, cylinders → cylinder truck or tricycle (by capacity).</div></div>';
+  $('#s-disp').innerHTML=h;}
+
+/* ---------- render: integrations ---------- */
+function rIntg(){const card=(t,st,body)=>'<div class="card int '+(st==='now'?'now':'plan')+'"><div class="row" style="justify-content:space-between"><h3 style="margin:0">'+t+'</h3>'+chip(st==='now'?'Available in this demo':'Planned · API-based',st==='now'?'ok':'amber')+'</div><div class="small" style="margin-top:8px">'+body+'</div></div>';
+  let h='<h2>Integrations: how Nota54 connects to your existing systems</h2><p class="lead">Honest status: this demo runs standalone. The connections below are <b>planned</b> and would be built API-first during onboarding, scoped to the systems you already use. No live integrations are claimed here.</p>';
+  h+='<div class="grid g3" style="margin-bottom:14px">'+
+   card('Accounting / ERP','plan','Push tax invoices, credit notes, customer balances and payments to your accounting system (e.g. QuickBooks, Sage, Odoo, or whatever you run) through its API; pull customer credit limits and outstanding balances back for credit control. Until then: CSV export (below).')+
+   card('Metering, tank gauges &amp; dispensers','plan','Read tank levels (automatic tank gauges) and dispenser / flow-meter totals through the vendor’s API or a small on-site connector, so book stock vs measured stock is compared automatically and variance alerts fire without manual dips.')+
+   card('Retail POS &amp; forecourt systems','plan','Import outlet sales from an existing POS or forecourt controller by API or scheduled file, or use Nota54’s own checkout (shown in Clients &amp; sales).')+
+   card('Mobile money &amp; USSD','plan','Payment confirmation callbacks from a mobile-money provider and order intake from a USSD aggregator / your own app, posted into the same order and dispatch flow. In this demo payments are mocked.')+
+   card('Tax authority e-invoicing','plan','Where e-invoicing is required, invoices would be submitted through the authority’s approved API before printing. Scoped per country at onboarding.')+
+   card('Data in / out today','now','<button class="btn sm" data-act="csv" data-k="inv">Download invoices CSV</button> <button class="btn sm" data-act="csv" data-k="stock">Download stock CSV</button><div class="muted tiny" style="margin-top:6px">Opening stock, customers and price lists would be loaded from Excel/CSV during setup.</div>')+'</div>';
+  h+='<div class="grid g2"><div class="card"><h3>Proposed API shape (illustrative)</h3><pre class="json">POST /api/v1/stock-readings\n{\n  "site": "OUT1",\n  "product": "PMS",\n  "measured_litres": 37790,\n  "source": "tank-gauge",\n  "read_at": "2026-11-23T14:05:00Z"\n}\n\nPOST /api/v1/payments\n{\n  "reference": "PF-2611-001",\n  "amount": 1290.00,\n  "currency": "USD",\n  "channel": "mobile_money"\n}\n\nWebhook → your ERP: invoice.issued, delivery.completed</pre><div class="muted tiny">Endpoint names are a design proposal, not a published API.</div></div>';
+  h+='<div class="card"><h3>Likely questions from a technical team</h3><table class="t"><tr><td><b>Do you integrate with X today?</b></td><td class="small">Not yet. We scope your systems first and build the connector; CSV import/export works from day one.</td></tr><tr><td><b>Where is data hosted?</b></td><td class="small">To be agreed in the proposal (cloud region, backups, access roles). This demo keeps data only in your browser.</td></tr><tr><td><b>Offline outlets?</b></td><td class="small">Requirement noted for scoping; not shown in this demo.</td></tr><tr><td><b>User roles?</b></td><td class="small">Planned: depot, plant, outlet, sales, finance, dispatch and management roles with approval rights (e.g. credit override).</td></tr></table></div></div>';
+  $('#s-intg').innerHTML=h;}
+
+/* ---------- wiring ---------- */
+function render(){rDash();rDocs();rInv();rCli();rDisp();rIntg();
+  const oa=openAlerts().length;document.querySelectorAll('#tabs button').forEach(b=>{b.classList.toggle('on',b.dataset.tab===UI.tab);const n=b.querySelector('.n');if(n)n.remove();
+    let c=0;if(b.dataset.tab==='docs')c=S.lpos.filter(l=>['received','checked','proforma','blocked'].includes(l.status)).length+S.bols.filter(x=>x.status!=='reconciled').length;if(b.dataset.tab==='disp')c=S.lpos.filter(l=>l.status==='invoiced').length+S.orders.filter(o=>o.status==='queued').length;if(b.dataset.tab==='inv')c=S.alerts.filter(a=>a.open&&['Variance','Stock'].includes(a.area)).length;
+    if(c)b.insertAdjacentHTML('beforeend','<span class="n">'+c+'</span>');});
+  document.querySelectorAll('.sec').forEach(s=>s.classList.toggle('on',s.id==='s-'+UI.tab));save();}
+function form(el,name){const f=el.closest('[data-f="'+name+'"]')||document.querySelector('[data-f="'+name+'"]');const o={};f.querySelectorAll('[name]').forEach(i=>o[i.name]=i.value);return o;}
+function csv(kind){let rows;if(kind==='inv')rows=[['invoice','delivery_note','lpo','customer','product','quantity','unit','amount_'+CUR]].concat(S.lpos.filter(l=>l.inv).map(l=>[l.inv,l.dn,l.id,client(l.cl).n,l.items[0].sku,l.items[0].q,SKU[l.items[0].sku].u,(lineAmt(l.items)*CURS[CUR].r).toFixed(2)]));
+  else{rows=[['site','product','quantity','unit']];SITEIDS.forEach(s=>SKUS.forEach(k=>{if((S.cap[s]||{})[k]!=null)rows.push([SITES[s].n,k,S.stock[s][k],SKU[k].u]);}));}
+  const b=new Blob([rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\n')],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='nota54-demo-'+kind+'.csv';a.click();toast('Sample CSV downloaded');}
+document.addEventListener('click',e=>{const tb=e.target.closest('[data-tab]');if(tb){UI.tab=tb.dataset.tab;render();window.scrollTo(0,0);return;}
+  const go=e.target.closest('[data-tab-go]');if(go){UI.tab=go.dataset.tabGo;render();window.scrollTo(0,0);return;}
+  const el=e.target.closest('[data-act]');if(!el)return;const a=el.dataset.act,id=el.dataset.id;if(el.tagName==='A')e.preventDefault();
+  switch(a){
+    case 'reset':if(confirm('Reset all demo data to the original sample?')){localStorage.removeItem(KEY);S=seed();UI.tab='dash';}break;
+    case 'mclose':closeModal();return;
+    case 'print':{const f=$('#docf');if(f)f.contentWindow.print();return;}
+    case 'doc':showDoc(el.dataset.t,id);return;
+    case 'ack':{const x=S.alerts.find(z=>z.id==id);x.open=false;break;}
+    case 'bolNew':A.bolNew(form(el,'bol'));break;
+    case 'bolRcv':A.bolReceive(id,$('#rcv-'+CSS.escape(id)).value);break;
+    case 'bolRecon':A.bolRecon(id);break;
+    case 'bolClose':A.bolClose(id);break;
+    case 'lpoNew':A.lpoNew(form(el,'lpo'));break;
+    case 'lpoCheck':A.lpoCheck(id);break;
+    case 'lpoOverride':A.lpoOverride(id);break;
+    case 'lpoPf':A.lpoProforma(id);break;
+    case 'lpoPay':A.lpoConfirm(id,'pay');break;
+    case 'lpoAppr':A.lpoConfirm(id,'appr');break;
+    case 'trf':A.transfer(form(el,'trf'));break;
+    case 'fill':A.fill(form(el,'fill'));break;
+    case 'emp':A.empties(form(el,'emp'));break;
+    case 'cnt':A.count(form(el,'cnt'));break;
+    case 'cartAdd':A.cartAdd(el.dataset.sku,el.dataset.mode);break;
+    case 'cartRm':S.cart.splice(+el.dataset.i,1);break;
+    case 'checkout':A.checkout(form(el,'pos'));return;
+    case 'ussd':A.ussd(el.dataset.k);break;
+    case 'ussdEnd':S.ussd=null;break;
+    case 'tripNew':A.tripNew(el.dataset.kind,el.dataset.ref,$('#trk-'+CSS.escape(el.dataset.ref)).value);break;
+    case 'tripAdv':A.tripAdv(id);break;
+    case 'pod':{const f=el.closest('[data-f="pod"]');A.pod(f.dataset.id,form(el,'pod'));break;}
+    case 'csv':csv(el.dataset.k);return;
+  }
+  render();});
+document.addEventListener('change',e=>{if(e.target.dataset.ui==='trend'){UI.trend=e.target.value;rDash();}
+  if(e.target.name==='site'&&e.target.closest('[data-f="pos"]')){UI.posSite=e.target.value;rCli();}
+  if(e.target.id==='cur'){CUR=e.target.value;localStorage.setItem(KEY+'-cur',CUR);render();}});
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal();});
+function tick(){$('#clock').textContent=new Date().toLocaleString('en-GB',{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});}
+load();CUR=localStorage.getItem(KEY+'-cur')||'USD';if(!CURS[CUR])CUR='USD';
+$('#cur').innerHTML=Object.keys(CURS).map(k=>'<option'+(k===CUR?' selected':'')+'>'+k+'</option>').join('');
+const qs=new URLSearchParams(location.search);if(qs.get('cur')&&CURS[qs.get('cur')]){CUR=qs.get('cur');$('#cur').value=CUR;}if(qs.get('tab'))UI.tab=qs.get('tab');
+tick();setInterval(tick,30000);render();
+window.__n54={S:()=>S,A,UI,render,reset:()=>{S=seed();render();}};
+
+</script>
+</body>
+</html>
