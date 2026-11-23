@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0a1628">
+<title>Order gas &amp; fuel · Sample Energy Co. (demo)</title>
+<style>
+:root{--navy:#0a1628;--navy2:#12243f;--teal:#0d9488;--teal2:#14b8a6;--tsoft:#e6f7f5;--text:#0f172a;--muted:#64748b;--line:#e2e8f0;--bg:#f4f7fb;--amber:#b45309;--red:#b91c1c;--font:"Inter","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;--mono:ui-monospace,Menlo,Consolas,monospace}
+*{box-sizing:border-box}html,body{margin:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.hd{background:var(--navy);color:#fff;padding:14px 18px;padding-top:max(14px,env(safe-area-inset-top));display:flex;align-items:center;gap:10px}
+.mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--teal2),#22c55e);display:grid;place-items:center;font-weight:800;color:#03201c;font-size:14px;flex:0 0 34px}
+.hd .b{font-weight:800;font-size:16px;line-height:1.1;white-space:nowrap}.hd .p{font-size:11.5px;color:#9fb3cf;white-space:nowrap}.hd .p b{color:#5eead4}
+.hd .sp{flex:1}.demo{font-size:10px;font-weight:700;color:#fde68a;border:1px solid rgba(253,230,138,.4);border-radius:9px;padding:3px 8px;text-align:center;line-height:1.2}
+main{max-width:520px;margin:0 auto;padding:16px 16px 28px}
+h1{font-size:22px;margin:4px 0 4px;letter-spacing:-.01em}
+.lead{color:var(--muted);font-size:14px;margin:0 0 14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 4px 18px rgba(15,23,42,.05);margin-bottom:12px}
+label{display:block;font-size:13px;font-weight:600;margin:14px 0 6px}label .o{color:var(--muted);font-weight:500}
+input,select,textarea{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:1px solid #cbd5e1;border-radius:11px;background:#fff;color:var(--text);-webkit-appearance:none;appearance:none}
+input:focus,select:focus,textarea:focus{outline:2px solid rgba(20,184,166,.45);border-color:var(--teal2)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.seg.s2{grid-template-columns:1fr 1fr}
+.seg button{padding:11px 4px;border:1px solid #cbd5e1;border-radius:11px;background:#fff;font:inherit;font-weight:700;font-size:14.5px;color:var(--text);cursor:pointer;line-height:1.2}
+.seg button small{display:block;font-weight:500;font-size:11.5px;color:var(--muted);margin-top:2px}
+.seg button.on{background:var(--navy);color:#fff;border-color:var(--navy)}.seg button.on small{color:#9fb3cf}
+.prod{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.prod button{border:1.5px solid #cbd5e1;border-radius:14px;background:#fff;padding:12px 6px;font:inherit;cursor:pointer;color:var(--text);text-align:center}
+.prod button .i{font-size:24px;display:block;line-height:1.1}.prod button b{display:block;font-size:14px;margin-top:4px}.prod button span{display:block;font-size:11px;color:var(--muted)}
+.prod button.on{border-color:var(--teal2);background:var(--tsoft);box-shadow:0 0 0 3px rgba(20,184,166,.18)}
+.step{display:flex;align-items:center;border:1px solid #cbd5e1;border-radius:11px;overflow:hidden;background:#fff}
+.step button{width:52px;height:46px;border:0;background:#f1f5f9;font-size:22px;font-weight:700;color:var(--navy);cursor:pointer}
+.step input{border:0;text-align:center;font-weight:800;border-radius:0}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px;border:0;border-radius:13px;font:inherit;font-weight:800;font-size:17px;background:linear-gradient(135deg,var(--teal2),var(--teal));color:#fff;cursor:pointer;box-shadow:0 6px 16px rgba(13,148,136,.25)}
+.btn:disabled{opacity:.6}.btn.ghost{background:transparent;color:var(--teal);box-shadow:none;font-weight:700;font-size:15px;padding:12px}
+.link{background:none;border:0;color:var(--teal);font:inherit;font-weight:700;font-size:14px;padding:0;cursor:pointer}
+.priv{font-size:12.5px;color:var(--amber);background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:8px 10px;margin:14px 0 12px}
+.err{color:var(--red);font-size:13.5px;margin-top:8px}
+.hidden{display:none!important}
+.tot{display:flex;justify-content:space-between;align-items:baseline;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)}
+.tot .v{font-size:26px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.tot .l{font-size:13px;color:var(--muted)}
+.fx{font-size:11.5px;color:var(--muted);margin-top:4px}
+.ref{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--navy)}
+.badge{display:inline-flex;font-size:12px;font-weight:700;color:var(--teal);background:var(--tsoft);border-radius:99px;padding:4px 10px}
+.badge.amber{color:var(--amber);background:#fffbeb}.badge.red{color:var(--red);background:#fef2f2}
+.tl{list-style:none;padding:0;margin:12px 0 0}
+.tl li{display:flex;gap:12px;padding:0 0 14px;position:relative;color:#94a3b8;font-weight:600}
+.tl li::before{content:"";position:absolute;left:12px;top:26px;bottom:0;width:2px;background:var(--line)}.tl li:last-child::before{display:none}
+.tl .ic{width:26px;height:26px;border-radius:50%;border:2px solid #cbd5e1;flex:0 0 26px;display:grid;place-items:center;font-size:13px;color:#fff;background:#fff;position:relative;z-index:1}
+.tl li.ok{color:var(--text)}.tl li.ok .ic{background:var(--teal2);border-color:var(--teal2)}.tl li.ok .ic::after{content:"✓"}
+.tl li.on{color:var(--text)}.tl li.on .ic{border-color:var(--teal2);border-top-color:transparent;animation:spin .8s linear infinite}
+.tl li.bad{color:var(--red)}.tl li.bad .ic{background:var(--red);border-color:var(--red)}.tl li.bad .ic::after{content:"×"}
+.tl .t{font-size:15px}.tl .d{font-size:12.5px;color:var(--muted);font-weight:500;margin-top:1px}.tl .tm{margin-left:auto;font-size:12px;color:var(--muted);font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+@keyframes spin{to{transform:rotate(360deg)}}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:14px}.kv span{color:var(--muted)}.kv b{text-align:right}
+.note{font-size:13.5px;background:var(--tsoft);border:1px solid #99f6e4;border-radius:12px;padding:10px 12px;margin-top:12px}
+.note.amber{background:#fffbeb;border-color:#fde68a}
+.big{width:62px;height:62px;border-radius:50%;background:var(--teal2);color:#fff;display:grid;place-items:center;font-size:30px;margin:4px auto 8px;animation:pop .5s ease}
+@keyframes pop{0%{transform:scale(.5);opacity:0}100%{transform:none;opacity:1}}
+.mine{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;cursor:pointer}.mine:last-child{border:0}
+.ft{max-width:520px;margin:0 auto;padding:0 16px 26px;text-align:center;color:var(--muted);font-size:12px}
+.conn{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}.conn i{width:7px;height:7px;border-radius:50%;background:#94a3b8;display:inline-block}.conn i.live{background:#22c55e}.conn i.connecting,.conn i.reconnecting{background:#f59e0b}
+.fade{animation:fd .35s ease both}@keyframes fd{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.curs{display:inline-flex;border:1px solid #cbd5e1;border-radius:10px;overflow:hidden}.curs button{border:0;background:#fff;padding:5px 10px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;color:var(--text)}.curs button.on{background:var(--navy);color:#fff}
+</style>
+</head>
+<body>
+<header class="hd"><div class="mark">SE</div><div><div class="b">Sample Energy Co.</div><div class="p">Gas &amp; fuel delivery · powered by <b>Nota54</b></div></div><div class="sp"></div><span class="demo">Demo<br>sample prices</span></header>
+<main>
+  <section id="vNo" class="hidden fade">
+    <div class="card"><h1>Scan the QR code</h1><p class="lead">Open this page by scanning the QR code on the presenter's screen (<b>📱 Customer phone view</b>), or enter the session code shown there.</p>
+      <label for="codeIn">Session code</label><input id="codeIn" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="16 characters">
+      <div style="height:12px"></div><button class="btn" id="codeBtn">Continue</button><div class="err hidden" id="codeErr"></div></div>
+  </section>
+
+  <section id="vForm" class="hidden fade">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h1>Order gas or fuel</h1><button class="link" id="fillBtn" type="button">Fill sample</button></div>
+    <p class="lead">Delivered to your door or business. You'll see every step live: approval, vehicle, on the way, delivered.</p>
+    <form class="card" id="form" novalidate>
+      <label style="margin-top:0">What do you need?</label>
+      <div class="prod" id="prod">
+        <button type="button" data-v="cyl" class="on"><span class="i">🛢️</span><b>Gas cylinder</b><span>6 · 13 · 50 kg</span></button>
+        <button type="button" data-v="lpg"><span class="i">⛽</span><b>Bulk LPG</b><span>by kg, tanker</span></button>
+        <button type="button" data-v="fuel"><span class="i">🚚</span><b>Fuel</b><span>petrol / diesel</span></button>
+      </div>
+      <div id="gCyl">
+        <label>Cylinder size</label>
+        <div class="seg" id="size"><button type="button" data-v="C6">6 kg<small id="pC6"></small></button><button type="button" data-v="C13" class="on">13 kg<small id="pC13"></small></button><button type="button" data-v="C50">50 kg<small id="pC50"></small></button></div>
+        <label>Type</label>
+        <div class="seg s2" id="mode"><button type="button" data-v="swap" class="on">Refill<small>swap my empty</small></button><button type="button" data-v="new">New cylinder<small>+ deposit</small></button></div>
+        <label for="cq">How many</label>
+        <div class="step"><button type="button" data-d="-1" aria-label="fewer">−</button><input id="cq" inputmode="numeric" value="1" aria-label="cylinders"><button type="button" data-d="1" aria-label="more">+</button></div>
+      </div>
+      <div id="gLpg" class="hidden">
+        <label for="lq">Quantity (kg) <span class="o">100 to 15,000 kg</span></label><input id="lq" inputmode="numeric" value="2000">
+      </div>
+      <div id="gFuel" class="hidden">
+        <label>Product</label>
+        <div class="seg s2" id="fuel"><button type="button" data-v="AGO" class="on">Diesel<small>AGO</small></button><button type="button" data-v="PMS">Petrol<small>PMS</small></button></div>
+        <label for="fq">Litres <span class="o">200 to 27,000 L</span></label><input id="fq" inputmode="numeric" value="5000">
+      </div>
+      <div class="two"><div><label for="name">Your name</label><input id="name" autocomplete="name" maxlength="50"></div><div><label for="phone">Phone</label><input id="phone" type="tel" autocomplete="tel" maxlength="24" inputmode="tel"></div></div>
+      <label for="addr">Delivery address or landmark</label><input id="addr" maxlength="90" placeholder="e.g. Plot 12, near the market">
+      <label>Payment</label>
+      <div class="seg s2" id="pay"><button type="button" data-v="momo" class="on">Mobile money<small>mock prompt</small></button><button type="button" data-v="cod">Pay on delivery<small>cash / card</small></button></div>
+      <label for="note">Note for the driver <span class="o">(optional)</span></label><input id="note" maxlength="140" placeholder="e.g. Call at the gate">
+      <div class="tot"><div><div class="l">Estimated total</div><div class="fx">Sample prices · illustrative FX</div></div><div style="text-align:right"><div class="v" id="tot"></div><div class="curs" id="curs"></div></div></div>
+      <div class="priv">Demo only, don't enter real personal details. Your order passes through a public test relay. No payment is taken.</div>
+      <button class="btn" id="sendBtn" type="submit">Place order</button>
+      <div class="err hidden" id="formErr"></div>
+    </form>
+  </section>
+
+  <section id="vTrack" class="hidden fade">
+    <div class="card" id="trackCard"></div>
+    <div class="card hidden" id="mineCard"><b style="font-size:14px">My orders</b><div id="mine"></div></div>
+    <button class="btn ghost" id="againBtn" type="button">+ Place another order</button>
+  </section>
+</main>
+<div class="ft"><span class="conn"><i id="cDot"></i><span id="cTxt">Offline</span></span><br><br>Sample Energy Co. is a fictional demo company · products, prices, vehicles and drivers are sample data · powered by Nota54 from Trublshut</div>
+<script>
+(function(){
+'use strict';
+var NTFY='https://ntfy.sh';
+var $=function(s){return document.querySelector(s)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
+function rid(n){var a='abcdefghijkmnpqrstuvwxyz23456789',b=new Uint8Array(n),s='';crypto.getRandomValues(b);for(var i=0;i<n;i++)s+=a[b[i]%a.length];return s}
+var Bus={
+  pub:async function(topic,obj){var body=JSON.stringify(obj);for(var i=0;i<5;i++){try{var r=await fetch(NTFY+'/'+topic,{method:'POST',body:body});if(r.ok)return true;if(r.status===429){await sleep(3000*(i+1));continue}if(r.status>=400&&r.status<500)return false}catch(e){}await sleep(700*(i+1)*(i+1))}return false},
+  sub:function(topic,opt){var es=null,lastId=null,closed=false,seen={},retry=0,timer=null,beat=Date.now();
+    function status(s){opt.onStatus&&opt.onStatus(s)}
+    function open(){if(closed)return;clearTimeout(timer);if(es){try{es.close()}catch(e){}}var since=lastId||opt.since;
+      es=new EventSource(NTFY+'/'+topic+'/sse'+(since?'?since='+encodeURIComponent(since):''));status('connecting');
+      es.onopen=function(){retry=0;beat=Date.now();status('live')};
+      es.addEventListener('keepalive',function(){beat=Date.now()});
+      es.onmessage=function(ev){beat=Date.now();var d;try{d=JSON.parse(ev.data)}catch(e){return}if(!d||d.event!=='message'||seen[d.id])return;seen[d.id]=1;lastId=d.id;var m;try{m=JSON.parse(d.message)}catch(e){return}if(m&&typeof m==='object')opt.onMsg(m,d)};
+      es.onerror=function(){status('reconnecting');try{es.close()}catch(e){}clearTimeout(timer);timer=setTimeout(open,Math.min(15000,800*Math.pow(2,retry++)))}}
+    open();setInterval(function(){if(!closed&&Date.now()-beat>75000)open()},10000);
+    function wake(){if(!closed&&(!es||es.readyState!==1))open()}
+    document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')wake()});window.addEventListener('online',wake);window.addEventListener('pageshow',wake);
+    return {close:function(){closed=true;if(es)es.close()}}}
+};
+/* sample catalogue (same sample prices as the depot workspace) */
+var SKU={PMS:{n:'Petrol (PMS)',u:'L',p:1.18},AGO:{n:'Diesel (AGO)',u:'L',p:1.25},LPGB:{n:'Bulk LPG',u:'kg',p:1.22},C6:{n:'6 kg cylinder',kg:6,p:7.75},C13:{n:'13 kg cylinder',kg:13,p:16.80},C50:{n:'50 kg cylinder',kg:50,p:64.50}};
+var DEPOSIT={C6:23,C13:38,C50:100};
+var CURS={USD:1,KES:129,GHS:11,NGN:1500,ZAR:18,EUR:0.92};
+function nf(n,d){return Number(n).toLocaleString('en-GB',{minimumFractionDigits:d||0,maximumFractionDigits:d||0})}
+function money(n){return st.cur+' '+nf(n*CURS[st.cur],st.cur==='USD'||st.cur==='EUR'?2:0)}
+
+var VIEWS=['vNo','vForm','vTrack'];
+function show(v){VIEWS.forEach(function(x){$('#'+x).classList.toggle('hidden',x!==v)});window.scrollTo(0,0)}
+var params=new URLSearchParams(location.search);var code=(params.get('s')||'').toLowerCase().trim();
+var st,LS;
+function load(){LS='n54-energy-phone-'+code;try{st=JSON.parse(localStorage.getItem(LS)||'null')}catch(e){st=null}
+  if(!st||!st.cid)st={cid:rid(12),since:Math.floor(Date.now()/1000)-5,orders:[],cur:'USD',sel:null,me:{}};if(!CURS[st.cur])st.cur='USD'}
+function save(){try{localStorage.setItem(LS,JSON.stringify(st))}catch(e){}}
+var conn='offline',deskSeen=false;
+function setConn(s){conn=s;$('#cDot').className=s;$('#cTxt').textContent=s==='live'?(deskSeen?'Live · connected to the depot':'Live'):s==='connecting'?'Connecting…':'Reconnecting…';
+  if(s==='live'&&!setConn.h){setConn.h=1;Bus.pub(inT(),{t:'hello',cid:st.cid,ts:Date.now()})}}
+function inT(){return 'nota54-energy-'+code+'-in'}function outT(){return 'nota54-energy-'+code+'-out-'+st.cid}
+
+/* ---------- form ---------- */
+var F={prod:'cyl',size:'C13',mode:'swap',fuel:'AGO',pay:'momo'};
+function segBind(id,key,cb){$('#'+id).addEventListener('click',function(e){var b=e.target.closest('button[data-v]');if(!b)return;F[key]=b.dataset.v;[].forEach.call(this.querySelectorAll('button'),function(x){x.classList.toggle('on',x===b)});cb&&cb();calc()})}
+segBind('prod','prod',function(){$('#gCyl').classList.toggle('hidden',F.prod!=='cyl');$('#gLpg').classList.toggle('hidden',F.prod!=='lpg');$('#gFuel').classList.toggle('hidden',F.prod!=='fuel')});
+segBind('size','size');segBind('mode','mode');segBind('fuel','fuel');segBind('pay','pay');
+document.querySelector('.step').addEventListener('click',function(e){var b=e.target.closest('button[data-d]');if(!b)return;var v=Math.max(1,Math.min(20,(parseInt($('#cq').value,10)||1)+(+b.dataset.d)));$('#cq').value=v;calc()});
+['cq','lq','fq'].forEach(function(id){$('#'+id).addEventListener('input',calc)});
+function curBar(){$('#curs').innerHTML=['USD','KES','GHS'].map(function(c){return '<button type="button" data-c="'+c+'" class="'+(c===st.cur?'on':'')+'">'+c+'</button>'}).join('')}
+$('#curs').addEventListener('click',function(e){var b=e.target.closest('button[data-c]');if(!b)return;st.cur=b.dataset.c;save();curBar();calc();if(!$('#vTrack').classList.contains('hidden'))renderTrack()});
+function cur(){var sku,q,mode=null,lim;
+  if(F.prod==='cyl'){sku=F.size;q=parseInt($('#cq').value,10);mode=F.mode;lim=[1,20]}
+  else if(F.prod==='lpg'){sku='LPGB';q=parseInt(String($('#lq').value).replace(/[, ]/g,''),10);lim=[100,15000]}
+  else{sku=F.fuel;q=parseInt(String($('#fq').value).replace(/[, ]/g,''),10);lim=[200,27000]}
+  return {sku:sku,q:q,mode:mode,ok:q>=lim[0]&&q<=lim[1],lim:lim}}
+function lineTotal(sku,q,mode){return q*(SKU[sku].p+(mode==='new'?DEPOSIT[sku]:0))}
+function calc(){['C6','C13','C50'].forEach(function(k){$('#p'+k).textContent=money(SKU[k].p)});var c=cur();$('#tot').textContent=c.ok?money(lineTotal(c.sku,c.q,c.mode)):'—'}
+function label(o){return o.mode?o.q+' × '+SKU[o.sku].n+(o.mode==='new'?' (new + deposit)':' refill'):nf(o.q)+' '+SKU[o.sku].u+' '+SKU[o.sku].n}
+$('#fillBtn').addEventListener('click',function(){$('#name').value='Demo customer';$('#phone').value='+000 700 000 000';$('#addr').value='Sample Estate, House 14 (demo)';$('#note').value='Call at the gate';calc()});
+$('#form').addEventListener('submit',async function(e){e.preventDefault();var err=$('#formErr');err.classList.add('hidden');var c=cur();
+  if(!c.ok){err.textContent='Enter a quantity between '+nf(c.lim[0])+' and '+nf(c.lim[1])+'.';err.classList.remove('hidden');return}
+  if(!$('#name').value.trim()||!$('#addr').value.trim()){err.textContent='Add your name and a delivery address.';err.classList.remove('hidden');return}
+  var o={oid:rid(10),sku:c.sku,q:c.q,mode:c.mode,name:$('#name').value.trim(),phone:$('#phone').value.trim(),addr:$('#addr').value.trim(),note:$('#note').value.trim(),pay:F.pay,ts:Date.now(),st:'sent',hist:{sent:Date.now()},info:{}};
+  st.me={name:o.name,phone:o.phone,addr:o.addr};st.orders.unshift(o);st.sel=o.oid;save();
+  $('#sendBtn').disabled=true;renderTrack();show('vTrack');
+  var ok=await Bus.pub(inT(),{t:'order',cid:st.cid,oid:o.oid,sku:o.sku,q:o.q,mode:o.mode,name:o.name,phone:o.phone,addr:o.addr,note:o.note,pay:o.pay,ts:o.ts});
+  $('#sendBtn').disabled=false;
+  if(!ok){o.st='failed';save();renderTrack();return}
+  setTimeout(function(){if(o.st==='sent'){Bus.pub(inT(),{t:'order',cid:st.cid,oid:o.oid,sku:o.sku,q:o.q,mode:o.mode,name:o.name,phone:o.phone,addr:o.addr,note:o.note,pay:o.pay,ts:o.ts});renderTrack()}},12000);
+});
+$('#againBtn').addEventListener('click',function(){show('vForm')});
+
+/* ---------- tracking ---------- */
+var STEPS=[['sent','Order sent','From your phone'],['received','Received by the depot','Waiting for approval'],['approved','Approved','Stock reserved · receipt issued'],['assigned','Vehicle & driver assigned',''],['loading','Loaded at the depot','Gate pass issued'],['transit','On the way',''],['delivered','Delivered','Proof of delivery captured']];
+var ORDER=STEPS.map(function(s){return s[0]});
+function t2(ts){var d=new Date(ts);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0')}
+function renderTrack(){var o=st.orders.find(function(x){return x.oid===st.sel})||st.orders[0];if(!o){show('vForm');return}
+  var bad=o.st==='declined'||o.st==='failed',i=bad?(o.st==='failed'?0:1):ORDER.indexOf(o.st),info=o.info||{};
+  var badge=o.st==='delivered'?'<span class="badge">Delivered</span>':bad?'<span class="badge red">'+(o.st==='failed'?'Not sent':'Declined')+'</span>':o.st==='sent'?'<span class="badge amber">Sending…</span>':'<span class="badge">Live</span>';
+  var h='';if(o.st==='delivered')h+='<div class="big">✓</div>';
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div><div style="font-size:12.5px;color:var(--muted)">Order</div><div class="ref">'+esc(o.ref||'pending…')+'</div></div>'+badge+'</div>';
+  h+='<div class="kv"><span>Product</span><b>'+esc(label(o))+'</b></div><div class="kv"><span>Deliver to</span><b>'+esc(o.addr)+'</b></div><div class="kv"><span>Total</span><b>'+money(info.total!=null?info.total:lineTotal(o.sku,o.q,o.mode))+'</b></div><div class="kv"><span>Payment</span><b>'+(o.pay==='momo'?'Mobile money (mock)':'Pay on delivery')+'</b></div>';
+  if(info.receipt)h+='<div class="kv"><span>Receipt</span><b>'+esc(info.receipt)+'</b></div>';
+  h+='<ul class="tl">';
+  STEPS.forEach(function(s,k){var cls='',d=s[2],tm=o.hist&&o.hist[s[0]];
+    if(bad&&k>i)return;
+    if(k<=i)cls=(o.st==='sent'&&k===0)?'on':'ok';else if(k===i+1&&!bad&&o.st!=='sent')cls='on';
+    if(s[0]==='assigned'&&info.driver)d=esc(info.driver)+' · '+esc(info.vehicle||'');
+    if(s[0]==='transit'&&info.eta)d='ETA '+esc(info.eta);
+    if(s[0]==='delivered'&&info.pod)d='Signed by '+esc(info.pod.by)+' · '+esc(info.pod.q);
+    if(s[0]==='received'&&i>=2)d='by '+esc(info.site||'the depot');
+    h+='<li class="'+cls+'"><span class="ic"></span><div><div class="t">'+s[1]+'</div>'+(d?'<div class="d">'+d+'</div>':'')+'</div>'+(tm?'<span class="tm">'+t2(tm)+'</span>':'')+'</li>'});
+  if(o.st==='declined')h+='<li class="bad"><span class="ic"></span><div><div class="t">Declined by the depot</div><div class="d">'+esc(info.reason||'')+'</div></div><span class="tm">'+(o.hist.declined?t2(o.hist.declined):'')+'</span></li>';
+  if(o.st==='failed')h+='<li class="bad"><span class="ic"></span><div><div class="t">Could not reach the relay</div><div class="d">Check your connection and place the order again.</div></div></li>';
+  h+='</ul>';
+  if(o.hist&&o.hist.received&&o.hist.sent){h+='<div class="note">Received by the depot in <b>'+((o.hist.received-o.hist.sent)/1000).toFixed(1)+' s</b>. Every update on this screen comes live from the depot\'s Nota54 workspace.</div>'}
+  else if(o.st==='sent'&&Date.now()-o.ts>15000)h+='<div class="note amber">The depot screen hasn\'t confirmed yet. Keep this page open; it updates by itself.</div>';
+  h+='<div class="note amber" style="font-size:12px">Demo: sample products and prices. No real payment, SMS or delivery happens.</div>';
+  $('#trackCard').innerHTML=h;
+  var others=st.orders.slice(0,6);$('#mineCard').classList.toggle('hidden',others.length<2);
+  $('#mine').innerHTML=others.map(function(x){return '<div class="mine" data-o="'+x.oid+'"><span>'+(x.oid===o.oid?'<b>':'')+esc(x.ref||'Sending…')+(x.oid===o.oid?'</b>':'')+'<br><span style="color:var(--muted);font-size:12.5px">'+esc(label(x))+'</span></span><span class="badge'+(x.st==='declined'||x.st==='failed'?' red':'')+'">'+esc({sent:'Sending',received:'Received',approved:'Approved',assigned:'Vehicle assigned',loading:'Loaded',transit:'On the way',delivered:'Delivered',declined:'Declined',failed:'Not sent'}[x.st]||x.st)+'</span></div>'}).join('')}
+$('#mine').addEventListener('click',function(e){var r=e.target.closest('[data-o]');if(!r)return;st.sel=r.dataset.o;save();renderTrack();window.scrollTo(0,0)});
+function onMsg(m){
+  if(m.t==='hi'){deskSeen=true;setConn(conn);return}
+  if(m.t!=='st')return;var o=st.orders.find(function(x){return x.oid===m.oid});if(!o)return;
+  var allowed=ORDER.concat(['declined']);if(allowed.indexOf(m.st)<0)return;
+  deskSeen=true;o.ref=String(m.ref||'').slice(0,30);o.info=m.info&&typeof m.info==='object'?m.info:{};o.hist=o.hist||{};
+  var ni=ORDER.indexOf(m.st);ORDER.forEach(function(s,k){if(k>0&&k<=ni&&!o.hist[s])o.hist[s]=k===ni?Date.now():null});
+  if(!o.hist[m.st])o.hist[m.st]=Date.now();
+  o.st=m.st;save();setConn(conn);
+  if(!$('#vTrack').classList.contains('hidden')&&(st.sel===o.oid||!st.sel))renderTrack();else if(!$('#vTrack').classList.contains('hidden'))renderTrack();
+  if(navigator.vibrate&&['approved','transit','delivered'].indexOf(m.st)>=0){try{navigator.vibrate(60)}catch(e){}}}
+
+function start(){load();curBar();calc();
+  if(st.me&&st.me.name){$('#name').value=st.me.name;$('#phone').value=st.me.phone||'';$('#addr').value=st.me.addr||''}
+  Bus.sub(outT(),{since:st.since,onStatus:setConn,onMsg:onMsg});
+  if(st.orders.length){renderTrack();show('vTrack')}else show('vForm');
+  setInterval(function(){var o=st.orders[0];if(o&&o.st==='sent'&&!$('#vTrack').classList.contains('hidden'))renderTrack()},5000)}
+$('#codeBtn').addEventListener('click',function(){var c=$('#codeIn').value.toLowerCase().replace(/[^a-z0-9]/g,'');if(c.length!==16){$('#codeErr').textContent='The code has 16 letters and numbers.';$('#codeErr').classList.remove('hidden');return}
+  history.replaceState(null,'','?s='+c);code=c;start()});
+if(/^[a-z0-9]{16}$/.test(code))start();else show('vNo');
+})();
+</script>
+</body>
+</html>
