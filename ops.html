@@ -74,6 +74,20 @@ table.board tr.flash{background:rgba(20,184,166,.12)}
 .notif-empty{padding:18px 8px;text-align:center;color:var(--muted);font-size:12.5px}
 @media (max-width:1100px){.layout{grid-template-columns:1fr}}
 @media (max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}.sub,.sep{display:none}table.board{font-size:12px}}
+
+.segcur{display:inline-flex;border:1px solid var(--n6);border-radius:9px;overflow:hidden}
+.segcur button{border:0;background:var(--n8);color:var(--text);padding:5px 10px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.segcur button.on{background:var(--teal);color:#03201c}
+.fxnote{font-size:11px;color:var(--muted);max-width:380px;line-height:1.35;margin:0}
+.chip.wa{color:#7dd3fc;border-color:rgba(56,189,248,.45);background:rgba(14,116,144,.18)}
+.ms-cap{font-size:12px;font-weight:700;margin-bottom:6px}
+.demo-tag{display:inline-block;margin-left:6px;font-size:10px;font-weight:700;color:#fcd34d;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);border-radius:8px;padding:1px 6px}
+.ms-list{list-style:none;padding:0;margin:0}
+.ms-list li{display:flex;gap:8px;align-items:flex-start;padding:2px 0;font-size:12px;color:var(--muted)}
+.ms-list li .ic{width:11px;height:11px;border-radius:50%;border:2px solid var(--n6);flex:0 0 11px;margin-top:3px}
+.ms-list li.ok{color:var(--text)}.ms-list li.ok .ic{background:var(--green);border-color:var(--green)}
+.ms-list li.on{color:var(--teal2);font-weight:700}.ms-list li.on .ic{border-color:var(--teal2)}
+
 </style>
 </head>
 <body>
@@ -84,6 +98,7 @@ table.board tr.flash{background:rgba(20,184,166,.12)}
   <div class="sp"></div>
   <span class="pill" id="sessPill" style="display:none">Session <span class="code" id="sessCode"></span></span>
   <span class="pill" id="conn"><span class="dot" id="connDot"></span><span id="connTxt">Connecting…</span></span>
+  <span id="curHead"></span>
   <span class="pill sample">Demo with sample rates</span>
 </header>
 
@@ -123,6 +138,7 @@ table.board tr.flash{background:rgba(20,184,166,.12)}
               <th>Freight</th>
               <th class="n">Quoted</th>
               <th>Status</th>
+              <th>Shipment progress</th>
               <th>Forwarder DB</th>
             </tr>
           </thead>
@@ -135,9 +151,9 @@ table.board tr.flash{background:rgba(20,184,166,.12)}
         <h3 style="margin:0">Client notifications</h3>
         <span class="chip" id="nCnt">0</span>
       </div>
-      <p class="tiny muted" style="margin:0 0 12px">Mock Email + SMS the forwarder’s client would get at each milestone. <b style="color:#fcd34d">Demo only — nothing is actually sent.</b></p>
+      <p class="tiny muted" style="margin:0 0 12px">Mock Email, SMS and WhatsApp cards at each milestone. <b style="color:#fcd34d">Demo only — nothing is actually sent.</b> SMS and WhatsApp show only if the enquiry included a phone number.</p>
       <div class="notif-list" id="notifList">
-        <div class="notif-empty" id="notifEmpty">No notifications yet. They appear when a quote is sent, accepted, or booked.</div>
+        <div class="notif-empty" id="notifEmpty">No notifications yet. They appear when a quote is sent, accepted, booked, or a shipment milestone is advanced.</div>
       </div>
     </div>
     </div>
@@ -152,6 +168,7 @@ table.board tr.flash{background:rgba(20,184,166,.12)}
 var NTFY='https://ntfy.sh';
 var TOPIC_PREFIX='nota54-demo-';
 function sleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
+function rid(n){var a='abcdefghijkmnpqrstuvwxyz23456789',b=new Uint8Array(n),s='';crypto.getRandomValues(b);for(var i=0;i<n;i++)s+=a[b[i]%a.length];return s}
 var Bus={
   pub:async function(topic,obj,tries){
     tries=tries||5;var body=JSON.stringify(obj);
@@ -206,10 +223,177 @@ var Bus={
 var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
 var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function fmtDate(d){d=new Date(d);return String(d.getDate()).padStart(2,'0')+' '+MON[d.getMonth()]+' '+d.getFullYear()}
-function fmtUSD(n){if(n==null||isNaN(n))return '—';return 'USD '+Math.round(n).toLocaleString('en-US')}
+function fmtUSD(n){return 'USD '+Math.round(n).toLocaleString('en-US')}
 function hms(t){var d=new Date(t);return [d.getHours(),d.getMinutes(),d.getSeconds()].map(function(x){return String(x).padStart(2,'0')}).join(':')}
-var LANES_O={mba:'Mombasa',nbo:'Nairobi ICD',oth:'Other'};
-var LANES_D={rtm:'Rotterdam',sha:'Shanghai',nyc:'New York',ham:'Hamburg',dxb:'Dubai (Jebel Ali)',oth:'Other'};
+var LANES_O={mba:'Mombasa, Kenya',nbo:'Nairobi ICD, Kenya'};
+var LANES_D={rtm:'Rotterdam, Netherlands',sha:'Shanghai, China',nyc:'New York, USA',ham:'Hamburg, Germany',dxb:'Jebel Ali (Dubai), UAE'};
+
+/* ---- Nota54 demo helpers: FX, milestones, WhatsApp parse, sample clearing (all clearly demo) ---- */
+function clipField(s,n){if(typeof clip==='function')return clip(s,n);s=String(s==null?'':s).replace(/[\u0000-\u001f]+/g,' ').trim();return s.length>n?s.slice(0,n):s;}
+var INQ_FIELDS=['name','company','email','phone','o','oTxt','d','dTxt','cargo','wt','cbm','ctr','qty','ready','msg','channel'];
+
+/* Fallback recorded 23 Nov 2026 from the public API below, used if the live fetch fails. */
+var FX={
+  usdKes:129.915267,
+  source:'ExchangeRate-API via open.er-api.com',
+  asOfUtc:'Mon, 23 Nov 2026 00:02:32 +0000',
+  asOfEat:'23 Nov 2026, 03:02 EAT',
+  live:false
+};
+var CURRENCY=(function(){try{var c=localStorage.getItem('n54.currency');return c==='KES'?'KES':'USD'}catch(e){return 'USD'}})();
+function fmtEatFromUtc(s){
+  try{
+    var d=new Date(s);
+    if(isNaN(+d))return String(s||'');
+    return new Intl.DateTimeFormat('en-GB',{timeZone:'Africa/Nairobi',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(d)+' EAT';
+  }catch(e){return String(s||'')}
+}
+function fxCaption(){
+  return 'Indicative only — 1 USD = '+FX.usdKes.toFixed(4)+' KES · source: '+FX.source+' · last update '+FX.asOfEat+(FX.live?' (refreshed on this page)':' (saved fallback if the API is unreachable)')+'. Not a CBK official rate and not used for a real booking.';
+}
+function fmtMoney(n){
+  if(n==null||isNaN(n))return '—';
+  if(CURRENCY==='KES')return 'KES '+Math.round(Number(n)*FX.usdKes).toLocaleString('en-US');
+  return fmtUSD(n);
+}
+function setCurrency(c){
+  CURRENCY=c==='KES'?'KES':'USD';
+  try{localStorage.setItem('n54.currency',CURRENCY)}catch(e){}
+  if(typeof window.__n54onCurrency==='function')window.__n54onCurrency();
+}
+function currencyToggleHTML(id){
+  return '<div class="segcur" id="'+id+'" role="group" aria-label="Currency"><button type="button" data-c="USD"'+(CURRENCY==='USD'?' class="on"':'')+'>USD</button><button type="button" data-c="KES"'+(CURRENCY==='KES'?' class="on"':'')+'>KES</button></div>';
+}
+function bindCurrencyToggle(id){
+  var el=typeof id==='string'?document.getElementById(id):id;
+  if(!el)return;
+  Array.prototype.forEach.call(el.querySelectorAll('button'),function(b){
+    b.classList.toggle('on',b.getAttribute('data-c')===CURRENCY);
+    b.onclick=function(){setCurrency(b.getAttribute('data-c'))};
+  });
+}
+function refreshFX(){
+  fetch('https://open.er-api.com/v6/latest/USD').then(function(r){return r.json()}).then(function(d){
+    if(!d||d.result!=='success'||!d.rates||d.rates.KES==null)return;
+    FX.usdKes=Number(d.rates.KES);
+    FX.source='ExchangeRate-API via open.er-api.com';
+    FX.asOfUtc=d.time_last_update_utc||FX.asOfUtc;
+    FX.asOfEat=fmtEatFromUtc(FX.asOfUtc);
+    FX.live=true;
+    if(typeof window.__n54onCurrency==='function')window.__n54onCurrency();
+  }).catch(function(){});
+}
+
+var MILESTONES=[
+  {id:'booked',label:'Booked'},
+  {id:'docs',label:'Docs received'},
+  {id:'sailed',label:'Vessel departed'},
+  {id:'arrived',label:'Arrived'},
+  {id:'customs',label:'Customs cleared'},
+  {id:'released',label:'Released'},
+  {id:'delivered',label:'Delivered'}
+];
+function destFromInquiry(f,ex){
+  if(ex&&ex.dName)return String(ex.dName).split(',')[0];
+  if(f&&f.d==='oth'&&f.dTxt)return f.dTxt;
+  if(f&&LANES_D[f.d])return String(LANES_D[f.d]).split(',')[0];
+  return 'destination';
+}
+function milestoneLabel(step,dest){
+  var m=MILESTONES[step];
+  if(!m)return '';
+  if(m.id==='arrived')return 'Arrived '+(dest||'destination');
+  return m.label;
+}
+function milestoneListHTML(step,dest,opt){
+  opt=opt||{};
+  var h='<div class="ms '+(opt.dark?'dark':'')+'"><div class="ms-cap">Shipment progress <span class="demo-tag">Demo status — not live tracking</span></div><ol class="ms-list">';
+  for(var i=0;i<MILESTONES.length;i++){
+    var cls=i<step?'ok':i===step?'on':'';
+    h+='<li class="'+cls+'"><span class="ic"></span><span>'+esc(milestoneLabel(i,dest))+'</span></li>';
+  }
+  return h+'</ol></div>';
+}
+
+var PORT_ALIASES={
+  mombasa:'mba','mombasa, kenya':'mba',mba:'mba',kemba:'mba',
+  nairobi:'nbo','nairobi icd':'nbo',nbo:'nbo',
+  rotterdam:'rtm',rtm:'rtm',
+  shanghai:'sha',sha:'sha',
+  'new york':'nyc',nyc:'nyc',
+  hamburg:'ham',ham:'ham',
+  dubai:'dxb','jebel ali':'dxb',dxb:'dxb'
+};
+function parseWhatsApp(text){
+  text=String(text||'').replace(/\r/g,'').trim();
+  var f={channel:'whatsapp',msg:clipField(text,600),name:'',company:'',email:'',phone:'',o:'oth',oTxt:'',d:'oth',dTxt:'',cargo:'',wt:'',cbm:'',ctr:'',qty:'',ready:''};
+  var ph=text.match(/\+?254[\s-]?\d{2,3}[\s-]?\d{3}[\s-]?\d{3,4}/);
+  if(ph)f.phone=ph[0].replace(/\s+/g,' ').trim();
+  var em=text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+  if(em)f.email=em[0];
+  var nc=text.match(/(?:this is|i am|i'm|from)\s+([A-Za-z][A-Za-z .']{1,40}?)\s+from\s+([A-Za-z0-9][^,\n]{1,60})/i);
+  if(nc){f.name=nc[1].trim();f.company=nc[2].replace(/[.,;]+$/,'').trim()}
+  else{
+    var fr=text.match(/\bfrom\s+([A-Za-z0-9][^,\n]{1,60})/i);
+    if(fr)f.company=fr[1].replace(/[.,;]+$/,'').trim();
+    var nm=text.match(/(?:this is|i am|i'm)\s+([A-Za-z][A-Za-z .']{1,40})/i);
+    if(nm)f.name=nm[1].trim();
+  }
+  if(!f.name)f.name='WhatsApp enquiry';
+  var mq=text.match(/(\d{1,2})\s*[x×]\s*(20|40)\s*(?:'|’|ft|foot|feet)?/i);
+  if(mq){f.qty=String(parseInt(mq[1],10));f.ctr=mq[2]==='40'?'40':'20'}
+  else if(/\blcl\b|groupage|consolidat/i.test(text))f.ctr='LCL';
+  else if(/\b40\s*(?:'|’|ft|foot)/i.test(text))f.ctr='40';
+  else if(/\b20\s*(?:'|’|ft|foot)/i.test(text))f.ctr='20';
+  var mk=text.match(/(\d[\d,]*(?:\.\d+)?)\s*(kg|kgs|kilos?)\b/i);
+  var mt=text.match(/(\d+(?:\.\d+)?)\s*(t|tons?|tonnes?|mt)\b/i);
+  if(mk)f.wt=String(parseFloat(mk[1].replace(/,/g,'')));
+  else if(mt)f.wt=String(parseFloat(mt[1])*1000);
+  var mv=text.match(/(\d+(?:\.\d+)?)\s*(cbm|m3|m³|cubic)/i);
+  if(mv)f.cbm=String(parseFloat(mv[1]));
+  function findPort(str){
+    var low=str.toLowerCase();
+    var keys=Object.keys(PORT_ALIASES).sort(function(a,b){return b.length-a.length});
+    for(var i=0;i<keys.length;i++){if(low.indexOf(keys[i])>=0)return PORT_ALIASES[keys[i]]}
+    return '';
+  }
+  var to=text.match(/\bto\s+([A-Za-z][A-Za-z ()]{2,30})/i);
+  var from=text.match(/\b(?:from|out of)\s+([A-Za-z][A-Za-z ()]{2,30})/i);
+  var dCode=to?findPort(to[1]):findPort(text);
+  var oCode=from?findPort(from[1]):'';
+  if(!oCode){if(/\bmombasa\b/i.test(text))oCode='mba';else if(/\bnairobi\b/i.test(text))oCode='nbo'}
+  if(oCode)f.o=oCode;
+  if(dCode)f.d=dCode;
+  var cargoLine=text.split('\n').map(function(l){return l.trim()}).filter(function(l){
+    if(!l||l.length<8)return false;
+    if(/^(hi|hello|hey|dear)\b/i.test(l))return false;
+    return /tea|coffee|avocado|nut|cargo|cartons|sacks|bags|reefer|ft|cbm|kg/i.test(l);
+  })[0];
+  f.cargo=clipField(cargoLine||text.replace(/\s+/g,' ').slice(0,120),120);
+  return f;
+}
+
+var QUOTING_STAFF=['Quoting officer A (sample)','Quoting officer B (sample)'];
+var CLEARING_STAFF=['Clearing officer A (sample)','Clearing officer B (sample)'];
+var DOC_CHECKLIST=[
+  {id:'bl',name:'Bill of lading (copy)'},
+  {id:'ci',name:'Commercial invoice'},
+  {id:'pl',name:'Packing list'},
+  {id:'idf',name:'IDF / customs entry'},
+  {id:'kra',name:'KRA duty assessment'}
+];
+/* Invented percentages so the layout has numbers. They are not KRA tariff rates. */
+function sampleDuty(sell){
+  sell=Number(sell)||0;
+  var duty=Math.round(sell*0.08), vat=Math.round(sell*0.05), idf=Math.round(sell*0.02);
+  return {duty:duty,vat:vat,idf:idf,total:duty+vat+idf,note:'SAMPLE figures for the demo layout only. Formula used here: 8% + 5% + 2% of the freight quote. These are not KRA rates and not an official assessment.'};
+}
+
+var WA_SAMPLES=[
+  "Hi, this is a demo contact from Sample Exporter A, +254 700 010 101.\nNeed a rate Mombasa to Rotterdam, 2 x 40ft black tea CTC in paper sacks, 52000 kg, 130 CBM.\nFOB Mombasa, not hazardous, HS 0902.30. Extra free days at destination please.",
+  "Hello, this is a demo contact from Sample Exporter E, +254 700 010 105, shipper.e@example.com.\nAbout 1.8 tons, 6 cbm packed tea and instant coffee in cartons, Nairobi ICD to Jebel Ali, LCL, DAP. Asap please."
+];
+
 
 (function(){
 'use strict';
@@ -259,16 +443,16 @@ function ensure(id,seed){
 
 function contactFor(o){
   var f=o.f||{};
-  var email=(f.email&&String(f.email).trim())||'shipper@example.com';
-  var phone=(f.phone&&String(f.phone).trim())||'+254 700 000 000';
-  var name=(f.name&&String(f.name).trim())||'Shipper';
+  var email=(f.email&&String(f.email).trim())||'';
+  var phone=(f.phone&&String(f.phone).trim())||'';
+  var name=(f.name&&String(f.name).trim())||'Demo contact';
   return {email:email,phone:phone,name:name};
 }
-function pushNotif(channel,event,o,at){
+function pushNotif(channel,event,o,at,to){
+  if(!to)return;
   var c=contactFor(o);
-  var to=channel==='Email'?c.email:c.phone;
   NOTIFS.unshift({id:o.id+'-'+channel+'-'+event+'-'+(at||Date.now()),channel:channel,event:event,to:to,who:c.name,orderId:o.id,at:at||Date.now(),demo:true});
-  if(NOTIFS.length>12)NOTIFS.length=12;
+  if(NOTIFS.length>24)NOTIFS.length=24;
   renderNotifs();
 }
 function notifyMilestone(o,key,event){
@@ -277,9 +461,13 @@ function notifyMilestone(o,key,event){
   if(o._notif[key])return;
   o._notif[key]=1;
   var at=Date.now();
-  /* slight SMS lag after email for demo realism */
-  pushNotif('Email',event,o,at);
-  pushNotif('SMS',event,o,at+(HYDRATING?0:800));
+  var c=contactFor(o);
+  var lag=HYDRATING?0:800;
+  if(c.email)pushNotif('Email',event,o,at,c.email);
+  if(c.phone){
+    pushNotif('SMS',event,o,at+lag,c.phone);
+    pushNotif('WhatsApp',event,o,at+lag*2,c.phone);
+  }
 }
 function markQuoted(o){
   if(o.declined)return;
@@ -300,19 +488,38 @@ function markBooked(o,ref){
   o.booked=true;o.status='Booked';
   if(ref)o.ref=ref;
   if(!o.dbId)o.dbId=fakeDbId(o.id);
+  if(o.ms==null)o.ms=0;
   flashUntil[o.id]=Date.now()+3500;
   if(!was)notifyMilestone(o,'booked','Booking confirmed');
+}
+function destFor(o){return destFromInquiry(o.f,o.ex)}
+function applyMs(o,step,label){
+  o.ms=step;o.msLabel=label||milestoneLabel(step,destFor(o));
+  notifyMilestone(o,'ms'+step,o.msLabel);
+}
+function advanceMs(id){
+  var o=ORDERS[id];if(!o||!(o.booked||o.status==='Booked'))return;
+  var cur=(o.ms==null?0:o.ms), next=cur+1;
+  if(next>=MILESTONES.length)return;
+  var label=milestoneLabel(next,destFor(o));
+  o.ms=next;o.msLabel=label;
+  notifyMilestone(o,'ms'+next,label);
+  var msg={t:'ms',id:id,step:next,label:label};
+  Bus.pub(TOPIC_PREFIX+code+'-out-'+id,msg);
+  Bus.pub(TOPIC_PREFIX+code+'-in',msg);
+  renderBoard();
+  toast(label+' · demo status');
 }
 function renderNotifs(){
   var list=$('#notifList'), empty=$('#notifEmpty'), cnt=$('#nCnt');
   if(!list)return;
   if(cnt)cnt.textContent=String(NOTIFS.length);
   if(!NOTIFS.length){
-    list.innerHTML='<div class="notif-empty" id="notifEmpty">No notifications yet. They appear when a quote is sent, accepted, or booked.</div>';
+    list.innerHTML='<div class="notif-empty" id="notifEmpty">No notifications yet. They appear when a quote is sent, accepted, booked, or a shipment milestone is advanced.</div>';
     return;
   }
   list.innerHTML=NOTIFS.map(function(n){
-    var ch=n.channel==='SMS'?'sms':'email';
+    var ch=n.channel==='SMS'?'sms':n.channel==='WhatsApp'?'wa':'email';
     return '<div class="notif">'+
       '<div class="toprow">'+
         '<span class="chip '+ch+'">'+esc(n.channel)+'</span>'+
@@ -346,7 +553,7 @@ function renderKPIs(){
     ['On board',list.length,'This session',''],
     ['Quoted',quoted,'Awaiting customer',''],
     ['In progress',prog,'Synced to forwarder DB','hl'],
-    ['Booked',booked,val?fmtUSD(val)+' quoted':'Sample rates','']
+    ['Booked',booked,val?fmtMoney(val)+' quoted':'Sample rates','']
   ].map(function(k){return '<div class="kpi '+k[3]+'"><div class="l">'+k[0]+'</div><div class="v">'+k[1]+'</div><div class="s">'+k[2]+'</div></div>'}).join('');
 }
 
@@ -374,11 +581,21 @@ function renderBoard(){
       db='<span class="tiny muted">Pending accept</span>';
     }
     var flash=flashUntil[o.id]&&flashUntil[o.id]>now?' flash':'';
+    var dest=destFor(o);
+    var msCell='<span class="tiny muted">—</span>';
+    if(st==='Booked'||o.booked){
+      var step=o.ms==null?0:o.ms;
+      msCell=milestoneListHTML(step,dest,{dark:true});
+      if(step<MILESTONES.length-1)msCell+='<button class="btn" style="margin-top:8px" type="button" data-adv="'+esc(o.id)+'">Advance to '+esc(milestoneLabel(step+1,dest))+'</button>';
+    }else if(st==='In progress'){
+      msCell='<span class="tiny muted">Booking first…</span>';
+    }
     return '<tr class="rownew'+flash+'" data-id="'+esc(o.id)+'">'+
-      '<td><div class="cust">'+esc(o.f.name||'Customer')+'</div><div class="co">'+esc(o.f.company||'')+'</div><div class="meta">#'+esc(o.id.slice(0,6).toUpperCase())+(o.recv?' · '+hms(o.recv):'')+'</div></td>'+
+      '<td><div class="cust">'+esc(o.f.name||'Customer')+'</div><div class="co">'+esc(o.f.company||'')+'</div><div class="meta">#'+esc(o.id.slice(0,6).toUpperCase())+(o.recv?' · '+hms(o.recv):'')+(o.f&&o.f.phone?' · '+esc(o.f.phone):'')+'</div></td>'+
       '<td class="freight"><div class="lane">'+esc(sum.lane)+'</div><div class="meta">'+esc(sum.ctr)+(sum.wt?' · '+esc(sum.wt):'')+'</div>'+(sum.cargo?'<div class="meta">'+esc(sum.cargo)+'</div>':'')+'</td>'+
-      '<td class="n"><b>'+fmtUSD(o.sell)+'</b>'+(o.no?'<div class="meta">'+esc(o.no)+'</div>':'')+'</td>'+
+      '<td class="n"><b>'+fmtMoney(o.sell)+'</b>'+(o.no?'<div class="meta">'+esc(o.no)+'</div>':'')+'</td>'+
       '<td>'+chipHTML(st)+'</td>'+
+      '<td>'+msCell+'</td>'+
       '<td>'+db+'</td>'+
       '</tr>';
   }).join('');
@@ -400,6 +617,9 @@ function listenOut(id){
         renderBoard();
       }else if(m.t==='bkd'&&m.ref){
         markBooked(o,m.ref);renderBoard();toast('Booked · '+m.ref+' · synced '+o.dbId);
+      }else if(m.t==='ms'&&m.step!=null){
+        var step=Number(m.step)||0;
+        if(o.ms!==step){applyMs(o,step,m.label);renderBoard()}
       }
     }
   });
@@ -408,7 +628,7 @@ function listenOut(id){
 function onIn(m){
   if(!m||typeof m.id!=='string'||!/^[a-z0-9]{8,12}$/.test(m.id))return;
   if(m.t==='inq'&&m.f&&typeof m.f==='object'){
-    var f={};['name','company','email','o','oTxt','d','dTxt','cargo','wt','cbm','ctr','qty','ready','msg'].forEach(function(k){if(m.f[k]!=null)f[k]=String(m.f[k]).slice(0,k==='msg'?600:120)});
+    var f={};INQ_FIELDS.forEach(function(k){if(m.f[k]!=null)f[k]=String(m.f[k]).slice(0,k==='msg'?600:k==='phone'?24:120)});
     var o=ensure(m.id,{f:f,recv:Date.now()});
     o.f=f;
     listenOut(m.id);
@@ -427,6 +647,10 @@ function onIn(m){
     var o=ensure(m.id,{});
     o.declined=true;o.status='Declined';
     renderBoard();
+  }else if(m.t==='ms'&&m.step!=null){
+    var o=ensure(m.id,{});
+    var step=Number(m.step)||0;
+    if(o.ms!==step){applyMs(o,step,m.label);renderBoard()}
   }
 }
 
@@ -441,7 +665,7 @@ function hydrateFromBackendLS(){
       var o=ensure(q.id,{f:q.f||{},recv:q.recv||Date.now(),sell:q.sell,no:q.no,ref:q.ref,declined:!!q.declined});
       if(q.stage>=9||q.sell!=null||q.no)markQuoted(o);
       if(q.stage>=10)markAccepted(o);
-      if(q.stage>=11||q.ref){markBooked(o,q.ref)}
+      if(q.stage>=11||q.ref){markBooked(o,q.ref);if(q.ms!=null)o.ms=q.ms}
       else if(q.stage>=10){o.status='In progress'}
       else if(o.quoted)o.status='Quoted';
       listenOut(q.id);
@@ -493,6 +717,18 @@ $('#joinBtn').onclick=function(){
   else{$('#codeIn').style.borderColor='#ef4444'}
 };
 $('#codeIn').addEventListener('keydown',function(e){if(e.key==='Enter')$('#joinBtn').click()});
+
+
+document.addEventListener('click',function(e){
+  var b=e.target.closest?e.target.closest('[data-adv]'):null;
+  if(b)advanceMs(b.getAttribute('data-adv'));
+});
+function renderCurrencyChrome(){
+  var el=$('#curHead');
+  if(el){el.innerHTML=currencyToggleHTML('opCur')+'<div class="fxnote">'+esc(fxCaption())+'</div>';bindCurrencyToggle('opCur')}
+}
+window.__n54onCurrency=function(){renderCurrencyChrome();renderBoard()};
+refreshFX();renderCurrencyChrome();
 
 if(/^[a-z0-9]{16}$/.test(code))showBoard();
 else{

@@ -6,6 +6,17 @@
 
 All data is sample data: carriers A–H are fictional and the rates are not real carrier rates. Extraction is rule-based; no paid AI is used.
 
+
+Also in this demo (all labelled sample or demo; nothing is a live integration):
+- The customer form has an optional phone field. Mock SMS and WhatsApp notification cards on the ops board use that number. If no number is given, those cards are not created (no placeholder number).
+- A USD / KES toggle on all three pages. The rate, source and last-update time are shown on screen and labelled indicative. The quoted amount is converted for display only.
+- The backend has a minimum-margin warning if the applied margin is below a floor set in Workflow settings.
+- **Paste WhatsApp enquiry** on the backend runs pasted text through the same rule-based extractor and creates an inquiry. There is no live WhatsApp connection.
+- After booking, a shipment-progress list (Booked → Docs received → Vessel departed → Arrived <destination> → Customs cleared → Released → Delivered) is shown on the customer page and the ops board. Advance it from the ops board (or the backend). Each step can add mock Email / SMS / WhatsApp cards. This is not live cargo tracking.
+- A **Clearing desk** tab on the backend, using extracted HS / DG / Incoterm fields, a document checklist, a clearing assignee from a separate sample staff list, and SAMPLE duty figures (an invented 8% + 5% + 2% of the freight quote, labelled as not KRA rates).
+
+Sample “Fill” / simulate / WhatsApp-paste enquiries use generic labels only (Demo contact, Sample Exporter A–E). They are not real clients or prospects.
+
 ## How it works
 - The backend generates a random session code (16 characters) and shows a QR code for `index.html?s=<code>`.
 - **Open ops board** on the backend opens `ops.html?c=<code>` in a new tab with the same session.
@@ -22,6 +33,8 @@ All data is sample data: carriers A–H are fictional and the rates are not real
 3. Phone: scan QR → send inquiry → watch quote arrive.
 4. Phone: Accept quote → ops board row flips to **In progress** with `Synced to forwarder DB · SF-2026-XXXX`.
 5. Backend continues to Booked; ops board follows when the booking confirmation is observed.
+6. On the ops board, advance shipment progress and watch the customer page and mock notification cards update.
+7. Open the Clearing desk tab for the booked job (SAMPLE duty figures and a document checklist).
 
 ## Publish on GitHub Pages (free)
 1. Create a public repo, e.g. `nota54-demo`, and upload `index.html`, `backend.html` and `ops.html` (this folder, without `tool/` and `shots/`).

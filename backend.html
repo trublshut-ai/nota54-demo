@@ -111,6 +111,30 @@ tr.best td{background:rgba(20,184,166,.10)}
 .toast.show{opacity:1;transform:none}
 @media (max-width:1200px){.kpis{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:1fr}.wrap{grid-template-columns:290px 1fr}.stepper{grid-template-columns:repeat(6,1fr);row-gap:10px}.stepper .st:nth-child(7)::after{display:none}}
 @media (max-width:800px){.wrap{grid-template-columns:1fr}.list{max-height:none}.sub,.sep{display:none}}
+
+.segcur{display:inline-flex;border:1px solid var(--n6);border-radius:9px;overflow:hidden}
+.segcur button{border:0;background:var(--n8);color:var(--text);padding:5px 10px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.segcur button.on{background:var(--teal);color:#03201c}
+.fxnote{font-size:11px;color:var(--muted);max-width:420px;line-height:1.35}
+.desk-tabs{display:flex;gap:8px;padding:12px 20px 0}
+.desk-tabs button{border:1px solid var(--n6);background:var(--n8);color:var(--text);padding:8px 14px;border-radius:10px;font:inherit;font-weight:700;font-size:13px;cursor:pointer}
+.desk-tabs button.on{background:linear-gradient(135deg,var(--teal),#0ea5a0);color:#03201c;border-color:transparent}
+.wa-box textarea{width:100%;min-height:110px;background:var(--n85);border:1px solid var(--n6);color:var(--text);border-radius:8px;padding:8px 10px;font:inherit;font-size:13px;resize:vertical}
+.ms-cap{font-size:12px;font-weight:700;margin-bottom:6px}
+.demo-tag{display:inline-block;margin-left:6px;font-size:10px;font-weight:700;color:#fcd34d;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);border-radius:8px;padding:1px 6px}
+.ms-list{list-style:none;padding:0;margin:0}
+.ms-list li{display:flex;gap:8px;align-items:flex-start;padding:3px 0;font-size:12.5px;color:var(--muted)}
+.ms-list li .ic{width:12px;height:12px;border-radius:50%;border:2px solid var(--n6);flex:0 0 12px;margin-top:3px}
+.ms-list li.ok{color:var(--text)}.ms-list li.ok .ic{background:var(--green);border-color:var(--green)}
+.ms-list li.on{color:var(--teal2);font-weight:700}.ms-list li.on .ic{border-color:var(--teal2)}
+.clear-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.clear-table th,.clear-table td{padding:8px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;white-space:normal}
+.clear-table th{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.docs{display:flex;flex-direction:column;gap:4px;font-size:12px}
+.docs label{display:flex;gap:6px;align-items:flex-start;font-weight:500}
+.duty{font-size:12px;background:var(--n85);border:1px dashed rgba(245,158,11,.45);border-radius:8px;padding:6px 8px}
+.duty b{color:#fcd34d}
+
 </style>
 </head>
 <body>
@@ -121,10 +145,12 @@ tr.best td{background:rgba(20,184,166,.10)}
   <div class="sub">Forwarder backend · Sample Forwarder Ltd</div>
   <div class="sp"></div>
   <span class="pill" id="conn"><span class="dot" id="connDot"></span><span id="connTxt">Connecting…</span></span>
+  <span id="curHead"></span>
   <span class="pill sample">Demo with sample rates</span>
 </header>
 <section class="kpis" id="kpis"></section>
-<div class="wrap">
+<div class="desk-tabs"><button type="button" class="on" id="tabQuote">Quoting desk</button><button type="button" id="tabClear">Clearing desk</button></div>
+<div class="wrap" id="quoteDesk">
   <aside style="display:flex;flex-direction:column;gap:14px;min-width:0">
     <div class="card">
       <h3>Scan to send a freight inquiry</h3>
@@ -141,7 +167,14 @@ tr.best td{background:rgba(20,184,166,.10)}
       <h3>Workflow settings</h3>
       <div class="toggle"><div><b>Auto-approve for demo</b><div class="tiny muted">Quotes above USD 5,000 normally need manager approval</div></div><label class="sw"><input type="checkbox" id="auto" checked><span></span></label></div>
       <div class="toggle"><div><b>Margin on buy rate</b><div class="tiny muted">Applied to every quote line</div></div><span><input type="number" id="margin" min="0" max="40" step="1" value="12" style="width:60px"> %</span></div>
+      <div class="toggle"><div><b>Minimum margin warning</b><div class="tiny muted">Flags quotes if the applied margin is below this floor (demo warning only)</div></div><span><input type="number" id="minMargin" min="0" max="40" step="1" value="10" style="width:60px"> %</span></div>
       <div class="toggle"><div><b>Follow newest inquiry</b><div class="tiny muted">Auto-switch the main view</div></div><label class="sw"><input type="checkbox" id="follow" checked><span></span></label></div>
+    </div>
+    <div class="card wa-box">
+      <h3>Paste WhatsApp enquiry</h3>
+      <p class="tiny muted" style="margin:0 0 8px">Demo only — there is no live WhatsApp connection. Paste a message, or load a sample, and the same rule-based extractor creates an inquiry in this session.</p>
+      <textarea id="waPaste" maxlength="1200" placeholder="Paste a WhatsApp-style rate request…"></textarea>
+      <div class="row" style="margin-top:8px"><button class="btn" id="waSample" type="button">Load sample</button><button class="btn pri" id="waCreate" type="button">Create enquiry</button></div>
     </div>
     <div class="card" style="padding-bottom:10px">
       <div class="row" style="justify-content:space-between;margin-bottom:8px"><h3 style="margin:0">Incoming inquiries</h3><span class="chip" id="cnt">0</span></div>
@@ -150,6 +183,14 @@ tr.best td{background:rgba(20,184,166,.10)}
   </aside>
   <main class="card" id="detail" style="padding:16px 18px"></main>
 </div>
+<section id="clearDesk" class="hidden" style="padding:14px 20px 20px">
+  <div class="card">
+    <div class="row" style="justify-content:space-between;margin-bottom:8px"><h3 style="margin:0">Clearing desk</h3><span class="chip" id="clearCnt">0 jobs</span></div>
+    <p class="tiny muted" style="margin:0 0 12px">Sample staff and SAMPLE duty figures only — not a KRA assessment and not connected to any customs system. Clearing assignees are a separate list from the quoting desk.</p>
+    <div id="clearEmpty" class="tiny muted">No booked jobs yet. After a quote is accepted and booked, the shipment appears here for clearing.</div>
+    <div id="clearTableWrap" class="hidden" style="overflow:auto"></div>
+  </div>
+</section>
 <div class="foot"><b>Demo with sample rates.</b> Customers type their own test inquiries; carriers (Carrier A–H) and all rates are fictional sample data. Extraction is rule-based in this demo. Messages travel over the public ntfy.sh relay; do not enter confidential information. © 2026 Trublshut AI Limited, Kenya.</div>
 <div class="toast" id="toast"></div>
 <script>
@@ -2517,6 +2558,172 @@ function hms(t){var d=new Date(t);return [d.getHours(),d.getMinutes(),d.getSecon
 var LANES_O={mba:'Mombasa, Kenya',nbo:'Nairobi ICD, Kenya'};
 var LANES_D={rtm:'Rotterdam, Netherlands',sha:'Shanghai, China',nyc:'New York, USA',ham:'Hamburg, Germany',dxb:'Jebel Ali (Dubai), UAE'};
 
+/* ---- Nota54 demo helpers: FX, milestones, WhatsApp parse, sample clearing (all clearly demo) ---- */
+function clipField(s,n){if(typeof clip==='function')return clip(s,n);s=String(s==null?'':s).replace(/[\u0000-\u001f]+/g,' ').trim();return s.length>n?s.slice(0,n):s;}
+var INQ_FIELDS=['name','company','email','phone','o','oTxt','d','dTxt','cargo','wt','cbm','ctr','qty','ready','msg','channel'];
+
+/* Fallback recorded 23 Nov 2026 from the public API below, used if the live fetch fails. */
+var FX={
+  usdKes:129.915267,
+  source:'ExchangeRate-API via open.er-api.com',
+  asOfUtc:'Mon, 23 Nov 2026 00:02:32 +0000',
+  asOfEat:'23 Nov 2026, 03:02 EAT',
+  live:false
+};
+var CURRENCY=(function(){try{var c=localStorage.getItem('n54.currency');return c==='KES'?'KES':'USD'}catch(e){return 'USD'}})();
+function fmtEatFromUtc(s){
+  try{
+    var d=new Date(s);
+    if(isNaN(+d))return String(s||'');
+    return new Intl.DateTimeFormat('en-GB',{timeZone:'Africa/Nairobi',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(d)+' EAT';
+  }catch(e){return String(s||'')}
+}
+function fxCaption(){
+  return 'Indicative only — 1 USD = '+FX.usdKes.toFixed(4)+' KES · source: '+FX.source+' · last update '+FX.asOfEat+(FX.live?' (refreshed on this page)':' (saved fallback if the API is unreachable)')+'. Not a CBK official rate and not used for a real booking.';
+}
+function fmtMoney(n){
+  if(n==null||isNaN(n))return '—';
+  if(CURRENCY==='KES')return 'KES '+Math.round(Number(n)*FX.usdKes).toLocaleString('en-US');
+  return fmtUSD(n);
+}
+function setCurrency(c){
+  CURRENCY=c==='KES'?'KES':'USD';
+  try{localStorage.setItem('n54.currency',CURRENCY)}catch(e){}
+  if(typeof window.__n54onCurrency==='function')window.__n54onCurrency();
+}
+function currencyToggleHTML(id){
+  return '<div class="segcur" id="'+id+'" role="group" aria-label="Currency"><button type="button" data-c="USD"'+(CURRENCY==='USD'?' class="on"':'')+'>USD</button><button type="button" data-c="KES"'+(CURRENCY==='KES'?' class="on"':'')+'>KES</button></div>';
+}
+function bindCurrencyToggle(id){
+  var el=typeof id==='string'?document.getElementById(id):id;
+  if(!el)return;
+  Array.prototype.forEach.call(el.querySelectorAll('button'),function(b){
+    b.classList.toggle('on',b.getAttribute('data-c')===CURRENCY);
+    b.onclick=function(){setCurrency(b.getAttribute('data-c'))};
+  });
+}
+function refreshFX(){
+  fetch('https://open.er-api.com/v6/latest/USD').then(function(r){return r.json()}).then(function(d){
+    if(!d||d.result!=='success'||!d.rates||d.rates.KES==null)return;
+    FX.usdKes=Number(d.rates.KES);
+    FX.source='ExchangeRate-API via open.er-api.com';
+    FX.asOfUtc=d.time_last_update_utc||FX.asOfUtc;
+    FX.asOfEat=fmtEatFromUtc(FX.asOfUtc);
+    FX.live=true;
+    if(typeof window.__n54onCurrency==='function')window.__n54onCurrency();
+  }).catch(function(){});
+}
+
+var MILESTONES=[
+  {id:'booked',label:'Booked'},
+  {id:'docs',label:'Docs received'},
+  {id:'sailed',label:'Vessel departed'},
+  {id:'arrived',label:'Arrived'},
+  {id:'customs',label:'Customs cleared'},
+  {id:'released',label:'Released'},
+  {id:'delivered',label:'Delivered'}
+];
+function destFromInquiry(f,ex){
+  if(ex&&ex.dName)return String(ex.dName).split(',')[0];
+  if(f&&f.d==='oth'&&f.dTxt)return f.dTxt;
+  if(f&&LANES_D[f.d])return String(LANES_D[f.d]).split(',')[0];
+  return 'destination';
+}
+function milestoneLabel(step,dest){
+  var m=MILESTONES[step];
+  if(!m)return '';
+  if(m.id==='arrived')return 'Arrived '+(dest||'destination');
+  return m.label;
+}
+function milestoneListHTML(step,dest,opt){
+  opt=opt||{};
+  var h='<div class="ms '+(opt.dark?'dark':'')+'"><div class="ms-cap">Shipment progress <span class="demo-tag">Demo status — not live tracking</span></div><ol class="ms-list">';
+  for(var i=0;i<MILESTONES.length;i++){
+    var cls=i<step?'ok':i===step?'on':'';
+    h+='<li class="'+cls+'"><span class="ic"></span><span>'+esc(milestoneLabel(i,dest))+'</span></li>';
+  }
+  return h+'</ol></div>';
+}
+
+var PORT_ALIASES={
+  mombasa:'mba','mombasa, kenya':'mba',mba:'mba',kemba:'mba',
+  nairobi:'nbo','nairobi icd':'nbo',nbo:'nbo',
+  rotterdam:'rtm',rtm:'rtm',
+  shanghai:'sha',sha:'sha',
+  'new york':'nyc',nyc:'nyc',
+  hamburg:'ham',ham:'ham',
+  dubai:'dxb','jebel ali':'dxb',dxb:'dxb'
+};
+function parseWhatsApp(text){
+  text=String(text||'').replace(/\r/g,'').trim();
+  var f={channel:'whatsapp',msg:clipField(text,600),name:'',company:'',email:'',phone:'',o:'oth',oTxt:'',d:'oth',dTxt:'',cargo:'',wt:'',cbm:'',ctr:'',qty:'',ready:''};
+  var ph=text.match(/\+?254[\s-]?\d{2,3}[\s-]?\d{3}[\s-]?\d{3,4}/);
+  if(ph)f.phone=ph[0].replace(/\s+/g,' ').trim();
+  var em=text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+  if(em)f.email=em[0];
+  var nc=text.match(/(?:this is|i am|i'm|from)\s+([A-Za-z][A-Za-z .']{1,40}?)\s+from\s+([A-Za-z0-9][^,\n]{1,60})/i);
+  if(nc){f.name=nc[1].trim();f.company=nc[2].replace(/[.,;]+$/,'').trim()}
+  else{
+    var fr=text.match(/\bfrom\s+([A-Za-z0-9][^,\n]{1,60})/i);
+    if(fr)f.company=fr[1].replace(/[.,;]+$/,'').trim();
+    var nm=text.match(/(?:this is|i am|i'm)\s+([A-Za-z][A-Za-z .']{1,40})/i);
+    if(nm)f.name=nm[1].trim();
+  }
+  if(!f.name)f.name='WhatsApp enquiry';
+  var mq=text.match(/(\d{1,2})\s*[x×]\s*(20|40)\s*(?:'|’|ft|foot|feet)?/i);
+  if(mq){f.qty=String(parseInt(mq[1],10));f.ctr=mq[2]==='40'?'40':'20'}
+  else if(/\blcl\b|groupage|consolidat/i.test(text))f.ctr='LCL';
+  else if(/\b40\s*(?:'|’|ft|foot)/i.test(text))f.ctr='40';
+  else if(/\b20\s*(?:'|’|ft|foot)/i.test(text))f.ctr='20';
+  var mk=text.match(/(\d[\d,]*(?:\.\d+)?)\s*(kg|kgs|kilos?)\b/i);
+  var mt=text.match(/(\d+(?:\.\d+)?)\s*(t|tons?|tonnes?|mt)\b/i);
+  if(mk)f.wt=String(parseFloat(mk[1].replace(/,/g,'')));
+  else if(mt)f.wt=String(parseFloat(mt[1])*1000);
+  var mv=text.match(/(\d+(?:\.\d+)?)\s*(cbm|m3|m³|cubic)/i);
+  if(mv)f.cbm=String(parseFloat(mv[1]));
+  function findPort(str){
+    var low=str.toLowerCase();
+    var keys=Object.keys(PORT_ALIASES).sort(function(a,b){return b.length-a.length});
+    for(var i=0;i<keys.length;i++){if(low.indexOf(keys[i])>=0)return PORT_ALIASES[keys[i]]}
+    return '';
+  }
+  var to=text.match(/\bto\s+([A-Za-z][A-Za-z ()]{2,30})/i);
+  var from=text.match(/\b(?:from|out of)\s+([A-Za-z][A-Za-z ()]{2,30})/i);
+  var dCode=to?findPort(to[1]):findPort(text);
+  var oCode=from?findPort(from[1]):'';
+  if(!oCode){if(/\bmombasa\b/i.test(text))oCode='mba';else if(/\bnairobi\b/i.test(text))oCode='nbo'}
+  if(oCode)f.o=oCode;
+  if(dCode)f.d=dCode;
+  var cargoLine=text.split('\n').map(function(l){return l.trim()}).filter(function(l){
+    if(!l||l.length<8)return false;
+    if(/^(hi|hello|hey|dear)\b/i.test(l))return false;
+    return /tea|coffee|avocado|nut|cargo|cartons|sacks|bags|reefer|ft|cbm|kg/i.test(l);
+  })[0];
+  f.cargo=clipField(cargoLine||text.replace(/\s+/g,' ').slice(0,120),120);
+  return f;
+}
+
+var QUOTING_STAFF=['Quoting officer A (sample)','Quoting officer B (sample)'];
+var CLEARING_STAFF=['Clearing officer A (sample)','Clearing officer B (sample)'];
+var DOC_CHECKLIST=[
+  {id:'bl',name:'Bill of lading (copy)'},
+  {id:'ci',name:'Commercial invoice'},
+  {id:'pl',name:'Packing list'},
+  {id:'idf',name:'IDF / customs entry'},
+  {id:'kra',name:'KRA duty assessment'}
+];
+/* Invented percentages so the layout has numbers. They are not KRA tariff rates. */
+function sampleDuty(sell){
+  sell=Number(sell)||0;
+  var duty=Math.round(sell*0.08), vat=Math.round(sell*0.05), idf=Math.round(sell*0.02);
+  return {duty:duty,vat:vat,idf:idf,total:duty+vat+idf,note:'SAMPLE figures for the demo layout only. Formula used here: 8% + 5% + 2% of the freight quote. These are not KRA rates and not an official assessment.'};
+}
+
+var WA_SAMPLES=[
+  "Hi, this is a demo contact from Sample Exporter A, +254 700 010 101.\nNeed a rate Mombasa to Rotterdam, 2 x 40ft black tea CTC in paper sacks, 52000 kg, 130 CBM.\nFOB Mombasa, not hazardous, HS 0902.30. Extra free days at destination please.",
+  "Hello, this is a demo contact from Sample Exporter E, +254 700 010 105, shipper.e@example.com.\nAbout 1.8 tons, 6 cbm packed tea and instant coffee in cartons, Nairobi ICD to Jebel Ali, LCL, DAP. Asap please."
+];
+
 /* ---- Nota54 engine: rule-based intake, validation, sample rates, scoring (all sample data) ---- */
 var DEST={
  rtm:{name:'Rotterdam, NL',code:'NLRTM',r20:1450,r40:2150,cbm:78,t:30,baf20:260,baf40:380},
@@ -2559,6 +2766,7 @@ function extract(f){
   function set(k,v,src){out[k]={v:v,src:src}}
   set('customer',clip(f.name,60)+(f.company?' · '+clip(f.company,60):''),'form');
   if(f.email)set('email',clip(f.email,80),'form');
+  if(f.phone)set('phone',clip(f.phone,24),f.channel==='whatsapp'?'message':'form');
   // lanes
   var o=ORIG[f.o]?f.o:'oth', d=DEST[f.d]?f.d:'oth';
   var oName=o==='oth'?(clip(f.oTxt,40)||''):ORIG[o].name, dName=d==='oth'?(clip(f.dTxt,40)||''):DEST[d].name;
@@ -2653,9 +2861,10 @@ var STAGES=['Received','AI intake','Validation','Carrier rates','Normalise','Sco
 var LS='n54.backend.v1';
 var st=load();
 function load(){var s;try{s=JSON.parse(localStorage.getItem(LS)||'null')}catch(e){}
-  if(!s||!/^[a-z0-9]{16}$/.test(s.code||''))s={code:rid(16),start:Math.floor(Date.now()/1000)-5,inqs:[],auto:true,margin:12,custBase:''};
+  if(!s||!/^[a-z0-9]{16}$/.test(s.code||''))s={code:rid(16),start:Math.floor(Date.now()/1000)-5,inqs:[],auto:true,margin:12,minMargin:10,custBase:''};
+  if(s.minMargin==null)s.minMargin=10;
   return s}
-function save(){var keep=INQ.filter(function(q){return q.stage>=9||q.declined}).map(function(q){return {id:q.id,f:q.f,recv:q.recv,ts:q.ts,stage:q.stage,qc:q.qc,no:q.no,sell:q.sell,tq:q.tq,ref:q.ref,declined:q.declined}});
+function save(){var keep=INQ.filter(function(q){return q.stage>=9||q.declined}).map(function(q){return {id:q.id,f:q.f,recv:q.recv,ts:q.ts,stage:q.stage,qc:q.qc,no:q.no,sell:q.sell,buy:q.buy,tq:q.tq,ref:q.ref,declined:q.declined,ms:q.ms,docs:q.docs,quotingBy:q.quotingBy,clearingBy:q.clearingBy}});
   st.inqs=keep.slice(-60);try{localStorage.setItem(LS,JSON.stringify(st))}catch(e){}}
 var INQ=[],SEL=null,V={},sub=null,pinUntil=0;
 var topicIn=function(){return TOPIC_PREFIX+st.code+'-in'}, topicOut=function(id){return TOPIC_PREFIX+st.code+'-out-'+id};
@@ -2674,9 +2883,10 @@ $('#copyBtn').onclick=function(){var u=custUrl();(navigator.clipboard?navigator.
 $('#opsBtn').onclick=function(){var base=location.href.split('#')[0].split('?')[0].replace(/backend\.html$/i,'ops.html');if(base===location.href.split('#')[0].split('?')[0])base=location.href.replace(/[^\/]+$/,'ops.html');window.open(base+'?c='+encodeURIComponent(st.code),'_blank');};
 $('#custSave').onclick=function(){var v=$('#custBase').value.trim();st.custBase=/^https?:\/\/.+/.test(v)&&v!==custBase()?v.split('?')[0]:(v?st.custBase:'');save();drawQR();toast('Customer page address saved')};
 $('#newBtn').onclick=function(){if(!confirm('Start a new session? The QR code changes and the inquiry list is cleared.'))return;
-  st={code:rid(16),start:Math.floor(Date.now()/1000)-5,inqs:[],auto:st.auto,margin:st.margin,custBase:st.custBase};INQ=[];SEL=null;save();drawQR();connect();renderAll();toast('New session started')};
+  st={code:rid(16),start:Math.floor(Date.now()/1000)-5,inqs:[],auto:st.auto,margin:st.margin,minMargin:st.minMargin,custBase:st.custBase};INQ=[];SEL=null;save();drawQR();connect();renderAll();renderClearing();toast('New session started')};
 $('#auto').checked=st.auto!==false;$('#auto').onchange=function(){st.auto=this.checked;save();INQ.forEach(function(q){if(q.waitApprove&&st.auto)q.waitApprove()})};
-$('#margin').value=st.margin;$('#margin').onchange=function(){st.margin=Math.max(0,Math.min(40,+this.value||0));this.value=st.margin;save()};
+$('#margin').value=st.margin;$('#margin').onchange=function(){st.margin=Math.max(0,Math.min(40,+this.value||0));this.value=st.margin;save();renderAll()};
+$('#minMargin').value=st.minMargin;$('#minMargin').onchange=function(){st.minMargin=Math.max(0,Math.min(40,+this.value||0));this.value=st.minMargin;save();renderAll()};
 $('#follow').onchange=function(){if(this.checked&&INQ.length){select(INQ[INQ.length-1].id)}};
 
 /* ---- connection ---- */
@@ -2690,12 +2900,13 @@ function onMsg(m){
   if(m.t==='inq'&&m.f&&typeof m.f==='object'){
     if(q){if(q.stage>=1&&q.stage<9)return; if(q.stage>=9){resendQuote(q)} return}
     if(INQ.length>=80)return;
-    var f={};['name','company','email','o','oTxt','d','dTxt','cargo','wt','cbm','ctr','qty','ready','msg'].forEach(function(k){f[k]=clip(m.f[k],k==='msg'?600:k==='cargo'?120:80)});
+    var f={};INQ_FIELDS.forEach(function(k){f[k]=clip(m.f[k],k==='msg'?600:k==='cargo'?120:k==='phone'?24:80)});
     if(!f.name&&!f.company)return;
-    q={id:m.id,f:f,recv:Date.now(),ts:[],stage:-1,fShown:0,flShown:0,rShown:0};
+    q={id:m.id,f:f,recv:Date.now(),ts:[],stage:-1,fShown:0,flShown:0,rShown:0,quotingBy:QUOTING_STAFF[INQ.length%QUOTING_STAFF.length],clearingBy:'',docs:{},ms:null};
     INQ.push(q);process(q);
   }else if(m.t==='acc'&&q){if(q.stage===9)accept(q);else q.pendingAcc=true}
-  else if(m.t==='dec'&&q&&q.stage===9){q.declined=true;save();renderAll()}
+  else if(m.t==='dec'&&q&&q.stage===9){q.declined=true;save();renderAll();renderClearing()}
+  else if(m.t==='ms'&&q&&m.step!=null){var step=Number(m.step)||0;if(q.ms===step)return;q.ms=step;q.msLabel=m.label||milestoneLabel(step,destFromInquiry(q.f,q.ex));save();renderAll();renderClearing()}
 }
 function resendQuote(q){if(q.quote)Bus.pub(topicOut(q.id),q.quote);if(q.ref)Bus.pub(topicOut(q.id),{t:'bkd',id:q.id,ref:q.ref,car:q.qc&&q.carName,etd:q.etd})}
 
@@ -2736,8 +2947,9 @@ function buildQuote(q){
 async function accept(q){
   if(q.stage!==9)return;q.pendingAcc=false;go(q,10);await sleep(2200);
   q.ref='BKG-'+q.qc+String(Math.floor(10000+Math.random()*89999));
+  q.ms=0;q.msLabel=milestoneLabel(0,destFromInquiry(q.f,q.ex));
   await Bus.pub(topicOut(q.id),{t:'bkd',id:q.id,ref:q.ref,car:q.carName,etd:q.etd});
-  go(q,11);save();toast('Booking confirmed for '+q.f.name+' · '+q.ref);
+  go(q,11);save();renderClearing();toast('Booking confirmed · '+q.ref);
 }
 
 /* ---- rendering ---- */
@@ -2752,7 +2964,7 @@ function renderKPIs(){
     ['Avg time to quote',sent.length?avg.toFixed(1)+' s':'n/a','Inquiry received → quote on phone','hl'],
     ['Manual baseline','2–4 h','Reported by a pilot forwarder, to be confirmed',''],
     ['Accepted · booked',acc+' · '+bk,sent.length?Math.round(acc/sent.length*100)+'% acceptance':'Waiting for quotes',''],
-    ['Value quoted',val?fmtUSD(val):'USD 0','Sample rates',''],
+    ['Value quoted',val?fmtMoney(val):fmtMoney(0),'Sample rates',''],
   ].map(function(k){return '<div class="kpi '+k[3]+'"><div class="l">'+k[0]+'</div><div class="v">'+k[1]+'</div><div class="s">'+k[2]+'</div></div>'}).join('');
 }
 function stageChip(q){
@@ -2770,10 +2982,10 @@ function renderList(){
   var have={};Array.prototype.forEach.call($('#list').children,function(c){if(c.dataset.id)have[c.dataset.id]=1});
   $('#list').innerHTML=INQ.slice().reverse().map(function(q){
     var lane=(q.ex?q.ex.oName.split(',')[0]+' → '+q.ex.dName.split(',')[0]:'…');
-    return '<div class="inq '+(q.id===SEL?'sel ':'')+(have[q.id]?'':'new')+'" data-id="'+q.id+'"><div class="n"><span>'+esc(q.f.name||'Customer')+'</span><span class="t" data-el="'+q.id+'">'+elapsed(q)+'</span></div><div class="tiny muted">'+esc(q.f.company||'')+' · '+esc(lane)+' · '+hms(q.recv)+'</div><div style="margin-top:5px">'+stageChip(q)+'</div></div>'}).join('');
+    return '<div class="inq '+(q.id===SEL?'sel ':'')+(have[q.id]?'':'new')+'" data-id="'+q.id+'"><div class="n"><span>'+esc(q.f.name||'Customer')+'</span><span class="t" data-el="'+q.id+'">'+elapsed(q)+'</span></div><div class="tiny muted">'+esc(q.f.company||'')+' · '+esc(lane)+' · '+hms(q.recv)+(q.f.channel==='whatsapp'?' · WhatsApp (demo)':'')+'</div><div style="margin-top:5px">'+stageChip(q)+'</div></div>'}).join('');
   Array.prototype.forEach.call($('#list').children,function(c){c.onclick=function(){pinUntil=Date.now()+30000;select(c.dataset.id)}});
 }
-function fieldHTML(k,o){var L={customer:'Customer',email:'Email',origin:'Origin',destination:'Destination',container:'Container',weight:'Weight / volume',cargo:'Cargo',incoterm:'Incoterm',hs:'HS code',dg:'DG status',ready:'Ready date',special:'Special requirements'};
+function fieldHTML(k,o){var L={customer:'Customer',email:'Email',phone:'Phone',origin:'Origin',destination:'Destination',container:'Container',weight:'Weight / volume',cargo:'Cargo',incoterm:'Incoterm',hs:'HS code',dg:'DG status',ready:'Ready date',special:'Special requirements'};
   var srcL={form:'form',message:'from message',assumed:'assumed',missing:'missing',none:'scanned'}[o.src]||o.src;
   return '<div class="f '+(o.src==='missing'?'missing':o.src==='assumed'?'assumed':'')+'"><label>'+(L[k]||k)+'<span class="src '+o.src+'">'+srcL+'</span></label><div class="v">'+esc(o.v)+'</div></div>'}
 function rateRow(c,i,scored,top){
@@ -2785,7 +2997,8 @@ function syncDetail(only){
   if(!q){if(V.id!=='none'){V={id:'none'};D.innerHTML='<div class="empty"><div class="pulse"></div><div class="big">Waiting for live inquiries</div><div>Ask the room to scan the QR code and send a freight inquiry from their phone.<br>Each one is processed here in real time and the quote goes straight back to their phone.</div></div>'}return}
   if(V.id!==q.id){
     V={id:q.id,f:0,fl:0,r:0,scored:false,reco:'',gate:''};
-    D.innerHTML='<div class="dh"><div><div class="tiny muted">Inquiry '+q.id.toUpperCase()+' · received '+hms(q.recv)+' via phone</div><div class="nm">'+esc(q.f.name)+(q.f.company?' <span class="muted" style="font-weight:600">· '+esc(q.f.company)+'</span>':'')+'</div><div class="small muted" id="dLane"></div></div><div><div class="timer" data-el="'+q.id+'">'+elapsed(q)+'</div><div class="tiny muted" style="text-align:right" id="dTimerLbl">elapsed</div></div></div>'+
+    var via=q.f.channel==='whatsapp'?'WhatsApp paste (demo — no live WhatsApp)':'customer form';
+    D.innerHTML='<div class="dh"><div><div class="tiny muted">Inquiry '+q.id.toUpperCase()+' · received '+hms(q.recv)+' via '+via+'</div><div class="nm">'+esc(q.f.name)+(q.f.company?' <span class="muted" style="font-weight:600">· '+esc(q.f.company)+'</span>':'')+'</div><div class="small muted" id="dLane"></div></div><div><div class="timer" data-el="'+q.id+'">'+elapsed(q)+'</div><div class="tiny muted" style="text-align:right" id="dTimerLbl">elapsed</div></div></div>'+
      '<div class="stepper" id="stepper">'+STAGES.map(function(s,i){return '<div class="st" data-i="'+i+'">'+s+'<span class="ts"></span></div>'}).join('')+'</div>'+'<div id="dTop"></div>'+
      (q.f.msg?'<div class="small" style="background:var(--n85);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:12px"><span class="muted tiny">CUSTOMER MESSAGE</span><br>'+esc(q.f.msg)+'</div>':'')+
      '<div class="g2"><div><div class="sec" id="secF"><h3>AI intake · extracted fields</h3><div class="fl" id="fl"></div></div><div class="sec" id="secV" style="margin-top:12px"><h3>Validation</h3><div class="flags" id="flags"></div></div></div>'+
@@ -2804,28 +3017,102 @@ function syncDetail(only){
   $('#normChip').innerHTML=q.stage>=4?'<span class="chip ok">Normalised · USD · all-in</span>':'';
   var rk=q.stage+'|'+(q.appr||'')+'|'+(q.ref||'')+'|'+(q.declined?1:0);
   if(q.stage>=6&&V.reco!==rk){V.reco=rk;var t=q.top,h='<div class="reco"><div class="row" style="justify-content:space-between"><div><div class="tiny" style="color:var(--teal2);font-weight:700;letter-spacing:.1em">RECOMMENDATION · WEIGHTED 40/25/15/10/10</div><div class="big">'+esc(t.name)+' <span class="muted" style="font-size:13px;font-weight:600">'+t.score.toFixed(1)+'/100</span></div></div></div><div class="small" style="margin-top:4px">'+esc(q.why)+'</div>';
-    if(q.stage>=7){h+='<div class="qbox"><div><span>Quote '+esc(q.no)+'</span><b>'+fmtUSD(q.sell)+'</b></div><div><span>Buy · margin</span><b>'+fmtUSD(q.buy)+' · '+st.margin+'%</b></div><div><span>Transit · free days</span><b>'+t.transit+' d · '+t.free+' d</b></div><div><span>ETD</span><b>'+fmtDate(t.etd)+'</b></div></div>';}
+    if(q.stage>=7){h+='<div class="qbox"><div><span>Quote '+esc(q.no)+'</span><b>'+fmtMoney(q.sell)+'</b></div><div><span>Buy · margin</span><b>'+fmtMoney(q.buy)+' · '+st.margin+'%</b></div><div><span>Transit · free days</span><b>'+t.transit+' d · '+t.free+' d</b></div><div><span>ETD</span><b>'+fmtDate(t.etd)+'</b></div></div>';
+      if(st.margin<st.minMargin)h+='<div class="gate wait" style="margin-top:8px"><span><b>Minimum margin warning:</b> applied margin '+st.margin+'% is below the '+st.minMargin+'% floor. Risk of under-quoting. Demo warning only — change the floor or the margin in Workflow settings.</span></div>';}
     if(q.stage>=8){if(q.appr==='below')h+='<div class="gate ok">Below USD 5,000 threshold · auto-send</div>';
       else if(q.appr==='auto')h+='<div class="gate done">Above USD 5,000 · auto-approved (demo mode)</div>';
       else if(q.appr==='manual')h+='<div class="gate done">Approved by manager · '+hms(q.ts[8])+'</div>';
       else if(q.appr==='wait')h+='<div class="gate wait"><span style="flex:1"><b>Approval required:</b> '+fmtUSD(q.sell)+' is above USD 5,000. The customer sees "awaiting approval".</span><button class="btn warn" id="apprBtn">✓ Approve & send</button></div>';}
-    if(q.stage>=9)h+='<div class="gate done" style="justify-content:space-between"><span><b>Quote delivered to phone</b> in '+(q.tq/1000).toFixed(1)+' s</span>'+(q.declined?'<span class="chip">Customer declined</span>':q.stage===9?'<span class="chip run">Waiting for customer…</span>':q.stage===10?'<span class="chip run">Accepted · preparing booking…</span>':'<span class="chip ok">Booked · '+esc(q.ref)+'</span>')+'</div>';
+    if(q.stage>=9)h+='<div class="gate done" style="justify-content:space-between"><span><b>Quote delivered to customer</b> in '+(q.tq/1000).toFixed(1)+' s</span>'+(q.declined?'<span class="chip">Customer declined</span>':q.stage===9?'<span class="chip run">Waiting for customer…</span>':q.stage===10?'<span class="chip run">Accepted · preparing booking…</span>':'<span class="chip ok">Booked · '+esc(q.ref)+'</span>')+'</div>';
+      if(q.stage>=11){var dest=destFromInquiry(q.f,q.ex);h+=milestoneListHTML(q.ms==null?0:q.ms,dest,{dark:true});if((q.ms==null?0:q.ms)<MILESTONES.length-1)h+='<div style="margin-top:8px"><button class="btn" id="msBtn" type="button">Advance to '+esc(milestoneLabel((q.ms==null?0:q.ms)+1,dest))+'</button><span class="tiny muted" style="margin-left:8px">Also available on the ops board. Demo status only.</span></div>';}
     h+='</div>';$('#reco').innerHTML=h;$('#dTop').innerHTML=q.appr==='wait'&&q.stage===8?'<div class="gate wait" style="margin:0 0 12px"><span style="flex:1"><b>Manager approval needed:</b> quote '+esc(q.no)+' for '+fmtUSD(q.sell)+' via '+esc(q.top.name)+' is above USD 5,000.</span><button class="btn warn" id="apprBtn2">✓ Approve & send</button></div>':'';
-    ['#apprBtn','#apprBtn2'].forEach(function(s){var ab=$(s);if(ab)ab.onclick=function(){q.appr='manual';if(q.waitApprove)q.waitApprove()}})}
+    ['#apprBtn','#apprBtn2'].forEach(function(s){var ab=$(s);if(ab)ab.onclick=function(){q.appr='manual';if(q.waitApprove)q.waitApprove()}});
+    var msb=$('#msBtn');if(msb)msb.onclick=function(){advanceMs(q)}}
 }
 setInterval(function(){INQ.forEach(function(q){if(q.tq==null){document.querySelectorAll('[data-el="'+q.id+'"]').forEach(function(e){e.textContent=elapsed(q)})}})},100);
 
 /* ---- simulate ---- */
-var SIM=[{name:'Demo walk-in',company:'Savanna Tea Traders',o:'mba',d:'rtm',ctr:'40',qty:'2',cargo:'Black tea CTC in paper sacks',wt:'52000',cbm:'130',ready:'',msg:'Need free days at destination if possible, FOB Mombasa, not hazardous. HS 0902.30'},
- {name:'Demo walk-in',company:'Pwani Nut Processors',o:'mba',d:'sha',ctr:'40',qty:'1',cargo:'Macadamia nuts in-shell',wt:'24000',cbm:'58',ready:'',msg:'CIF Shanghai, non-DG, HS 0802.62'},
- {name:'Demo walk-in',company:'Tana Packaged Foods',o:'nbo',d:'dxb',ctr:'LCL',qty:'',cargo:'Packaged tea and instant coffee, cartons',wt:'1800',cbm:'6',ready:'',msg:'asap please, DAP Jebel Ali'}];
+var SIM=[{name:'Demo contact',company:'Sample Exporter A',phone:'+254 700 010 101',email:'shipper.a@example.com',channel:'form',o:'mba',d:'rtm',ctr:'40',qty:'2',cargo:'Black tea CTC in paper sacks',wt:'52000',cbm:'130',ready:'',msg:'Need free days at destination if possible, FOB Mombasa, not hazardous. HS 0902.30'},
+ {name:'Demo contact',company:'Sample Exporter B',phone:'+254 700 010 102',email:'shipper.b@example.com',channel:'form',o:'mba',d:'sha',ctr:'40',qty:'1',cargo:'Macadamia nuts in-shell',wt:'24000',cbm:'58',ready:'',msg:'CIF Shanghai, non-DG, HS 0802.62'},
+ {name:'Demo contact',company:'Sample Exporter E',phone:'+254 700 010 105',email:'shipper.e@example.com',channel:'form',o:'nbo',d:'dxb',ctr:'LCL',qty:'',cargo:'Packaged tea and instant coffee, cartons',wt:'1800',cbm:'6',ready:'',msg:'asap please, DAP Jebel Ali'}];
 $('#simBtn').onclick=function(){var f=SIM[Math.floor(Math.random()*SIM.length)];Bus.pub(topicIn(),{t:'inq',id:rid(10),f:f}).then(function(ok){toast(ok?'Sample inquiry sent through the live channel':'Relay unreachable, check the internet connection')})};
+
+
+/* ---- desks, WhatsApp paste, milestones, currency ---- */
+function destFor(q){return destFromInquiry(q.f,q.ex)}
+function advanceMs(q){
+  var cur=(q.ms==null?0:q.ms), next=cur+1;
+  if(next>=MILESTONES.length)return;
+  var label=milestoneLabel(next,destFor(q));
+  var msg={t:'ms',id:q.id,step:next,label:label};
+  q.ms=next;q.msLabel=label;save();renderAll();renderClearing();
+  Bus.pub(topicOut(q.id),msg);Bus.pub(topicIn(),msg);
+  toast(label+' · demo status');
+}
+function showDesk(which){
+  var q=which!=='clear';
+  $('#tabQuote').classList.toggle('on',q);$('#tabClear').classList.toggle('on',!q);
+  $('#quoteDesk').classList.toggle('hidden',!q);$('#clearDesk').classList.toggle('hidden',q);
+  if(!q)renderClearing();
+}
+$('#tabQuote').onclick=function(){showDesk('quote')};
+$('#tabClear').onclick=function(){showDesk('clear')};
+var waI=0;
+$('#waSample').onclick=function(){$('#waPaste').value=WA_SAMPLES[waI++%WA_SAMPLES.length]};
+$('#waCreate').onclick=function(){
+  var raw=$('#waPaste').value.trim();
+  if(!raw){toast('Paste a WhatsApp-style message, or load a sample first');return}
+  var f=parseWhatsApp(raw);
+  Bus.pub(topicIn(),{t:'inq',id:rid(10),f:f,at:Date.now()}).then(function(ok){toast(ok?'WhatsApp enquiry created (demo — not from a live chat)':'Relay unreachable, check the internet connection')});
+};
+function docsDone(q){var n=0;DOC_CHECKLIST.forEach(function(d){if(q.docs&&q.docs[d.id])n++});return n}
+function renderClearing(){
+  var jobs=INQ.filter(function(q){return q.stage>=11||q.ref});
+  $('#clearCnt').textContent=jobs.length+(jobs.length===1?' job':' jobs');
+  if(!jobs.length){$('#clearEmpty').classList.remove('hidden');$('#clearTableWrap').classList.add('hidden');return}
+  $('#clearEmpty').classList.add('hidden');$('#clearTableWrap').classList.remove('hidden');
+  var html='<table class="clear-table"><thead><tr><th>Shipment</th><th>Extracted</th><th>Quoting desk</th><th>Clearing assignee</th><th>Document checklist</th><th>Duty (SAMPLE)</th><th>Status</th></tr></thead><tbody>';
+  jobs.slice().reverse().forEach(function(q){
+    var hs=(q.ex&&q.ex.fields.hs)?q.ex.fields.hs.v:'—';
+    var dg=(q.ex&&q.ex.fields.dg)?q.ex.fields.dg.v:'—';
+    var inc=(q.ex&&q.ex.fields.incoterm)?q.ex.fields.incoterm.v:'—';
+    var duty=sampleDuty(q.sell);
+    var docs=DOC_CHECKLIST.map(function(d){return '<label><input type="checkbox" data-doc="'+d.id+'" data-qid="'+esc(q.id)+'"'+(q.docs&&q.docs[d.id]?' checked':'')+'> '+esc(d.name)+(d.id==='kra'?' (SAMPLE)':'')+'</label>'}).join('');
+    var sel='<select data-clear="'+esc(q.id)+'">'+[''].concat(CLEARING_STAFF).map(function(n){return '<option value="'+esc(n)+'"'+(q.clearingBy===n?' selected':'')+'>'+(n||'Unassigned')+'</option>'}).join('')+'</select>';
+    html+='<tr><td><div style="font-weight:700">'+esc(q.f.company||'Sample shipper')+'</div><div class="tiny muted">'+esc(q.f.name||'')+' · '+esc(q.ref||'')+'</div><div class="tiny muted">'+(q.ex?esc(q.ex.oName)+' → '+esc(q.ex.dName):'')+'</div></td><td class="tiny">HS: '+esc(hs)+'<br>DG: '+esc(dg)+'<br>Incoterm: '+esc(inc)+(q.f.phone?'<br>Phone: '+esc(q.f.phone):'')+'</td><td class="tiny">'+esc(q.quotingBy||'—')+'</td><td>'+sel+'</td><td><div class="docs">'+docs+'<div class="tiny muted">'+docsDone(q)+' / '+DOC_CHECKLIST.length+' received</div></div></td><td><div class="duty"><b>SAMPLE</b><div>Duty '+fmtMoney(duty.duty)+'</div><div>VAT '+fmtMoney(duty.vat)+'</div><div>IDF '+fmtMoney(duty.idf)+'</div><div><b>Total '+fmtMoney(duty.total)+'</b></div><div class="tiny muted" style="margin-top:4px">'+esc(duty.note)+'</div></div></td><td>'+milestoneListHTML(q.ms==null?0:q.ms,destFor(q),{dark:true})+((q.ms==null?0:q.ms)<MILESTONES.length-1?'<button class="btn" style="margin-top:8px" data-adv="'+esc(q.id)+'" type="button">Advance</button>':'')+'</td></tr>';
+  });
+  html+='</tbody></table>';
+  $('#clearTableWrap').innerHTML=html;
+}
+document.addEventListener('change',function(e){
+  var t=e.target;
+  if(t&&t.getAttribute('data-clear')){
+    var q=INQ.find(function(x){return x.id===t.getAttribute('data-clear')});
+    if(!q)return;q.clearingBy=t.value;save();
+  }
+  if(t&&t.getAttribute('data-doc')&&t.getAttribute('data-qid')){
+    var q=INQ.find(function(x){return x.id===t.getAttribute('data-qid')});
+    if(!q)return;q.docs=q.docs||{};q.docs[t.getAttribute('data-doc')]=!!t.checked;save();renderClearing();
+  }
+});
+document.addEventListener('click',function(e){
+  var b=e.target.closest?e.target.closest('[data-adv]'):null;
+  if(!b)return;
+  var q=INQ.find(function(x){return x.id===b.getAttribute('data-adv')});
+  if(q)advanceMs(q);
+});
+function renderCurrencyChrome(){
+  var el=$('#curHead');
+  if(el){el.innerHTML=currencyToggleHTML('beCur')+'<div class="fxnote">'+esc(fxCaption())+'</div>';bindCurrencyToggle('beCur')}
+}
+window.__n54onCurrency=function(){renderCurrencyChrome();renderAll();renderClearing()};
+refreshFX();renderCurrencyChrome();
 
 /* ---- restore ---- */
 (st.inqs||[]).forEach(function(s){var q=Object.assign({fShown:99,flShown:99,rShown:8},s);q.ex=extract(q.f);q.R=rates(q.ex);q.S=score(q.R);q.top=q.S.find(function(c){return c.id===q.qc})||q.S[0];q.why=reason(q.S);q.appr=q.sell>THRESHOLD?'auto':'below';q.carName=q.top.name;q.etd=q.top.etd;buildQuote(q);q.no=s.no;q.sell=s.sell;q.quote.no=s.no;q.quote.total=s.sell;
   if(q.stage===10)q.stage=9;INQ.push(q)});
 if(INQ.length)SEL=INQ[INQ.length-1].id;
-drawQR();connect();renderAll();
+drawQR();connect();renderAll();renderClearing();
 window.__n54={state:st,INQ:INQ,custUrl:custUrl};
 })();
 </script>
